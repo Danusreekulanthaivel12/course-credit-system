@@ -1,0 +1,4 @@
+Starting Tests (Debug Response Mode)...
+✅ Admin Login Success
+✅ Department 'DebugResDept_1770552447454' Added (ID: 1)
+- Added R_CS1_1770552447467: 200
