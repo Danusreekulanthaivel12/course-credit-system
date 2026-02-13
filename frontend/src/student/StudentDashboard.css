@@ -1,0 +1,66 @@
+.student-container {
+    min-height: 100vh;
+    background-color: var(--bg-main);
+}
+
+.student-header {
+    height: 70px;
+    background-color: #1E293B;
+    /* Slate 800 */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    box-shadow: var(--shadow);
+}
+
+.student-content {
+    display: flex;
+    padding: 2rem;
+    gap: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.profile-section {
+    width: 320px;
+    flex-shrink: 0;
+}
+
+.courses-section {
+    flex: 1;
+}
+
+.course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.course-card-ui {
+    background: white;
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.course-card-ui:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+@media (max-width: 768px) {
+    .student-content {
+        flex-direction: column;
+        padding: 1rem;
+    }
+
+    .profile-section {
+        width: 100%;
+    }
+}

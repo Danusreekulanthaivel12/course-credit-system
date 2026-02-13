@@ -1,0 +1,12 @@
+
+> frontend@0.1.0 test
+> react-scripts test AdminDashboard.test.js --watchAll=false
+
+PASS src/admin/AdminDashboard.test.js
+  √ renders admin dashboard sidebar items (192 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   0 total
+Time:        1.147 s, estimated 2 s
+Ran all test suites matching /AdminDashboard.test.js/i.

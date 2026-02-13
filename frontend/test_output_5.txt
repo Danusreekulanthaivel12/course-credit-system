@@ -1,0 +1,217 @@
+
+> frontend@0.1.0 test
+> react-scripts test AdminDashboard.test.js --watchAll=false
+
+FAIL src/admin/AdminDashboard.test.js
+  × renders admin dashboard sidebar items (114 ms)
+
+  ● renders admin dashboard sidebar items
+
+    TestingLibraryElementError: Found multiple elements with the text: /Departments/i
+
+    Here are the matching elements:
+
+    Ignored nodes: comments, script, style
+    [36m<a[39m
+      [33mclass[39m=[32m"nav-link "[39m
+      [33mhref[39m=[32m"departments"[39m
+    [36m>[39m
+      [36m<span[39m
+        [33mclass[39m=[32m"nav-icon"[39m
+      [36m>[39m
+        [36m<svg[39m
+          [33mfill[39m=[32m"currentColor"[39m
+          [33mheight[39m=[32m"1em"[39m
+          [33mstroke[39m=[32m"currentColor"[39m
+          [33mstroke-width[39m=[32m"0"[39m
+          [33mviewBox[39m=[32m"0 0 512 512"[39m
+          [33mwidth[39m=[32m"1em"[39m
+          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+        [36m>[39m
+          [36m<path[39m
+            [33md[39m=[32m"M256 368a16 16 0 0 1-7.94-2.11L108 285.84a8 8 0 0 0-12 6.94V368a16 16 0 0 0 8.23 14l144 80a16 16 0 0 0 15.54 0l144-80a16 16 0 0 0 8.23-14v-75.22a8 8 0 0 0-12-6.94l-140.06 80.05A16 16 0 0 1 256 368z"[39m
+          [36m/>[39m
+          [36m<path[39m
+            [33md[39m=[32m"M495.92 190.5v-.11a16 16 0 0 0-8-12.28l-224-128a16 16 0 0 0-15.88 0l-224 128a16 16 0 0 0 0 27.78l224 128a16 16 0 0 0 15.88 0L461 221.28a2 2 0 0 1 3 1.74v144.53c0 8.61 6.62 16 15.23 16.43A16 16 0 0 0 496 368V192a14.76 14.76 0 0 0-.08-1.5z"[39m
+          [36m/>[39m
+        [36m</svg>[39m
+      [36m</span>[39m
+      [0mDepartments[0m
+    [36m</a>[39m
+
+    Ignored nodes: comments, script, style
+    [36m<h2[39m
+      [33mstyle[39m=[32m"font-size: 1.5rem; font-weight: 600;"[39m
+    [36m>[39m
+      [0mDepartments[0m
+    [36m</h2>[39m
+
+    Ignored nodes: comments, script, style
+    [36m<option[39m
+      [33mvalue[39m=[32m""[39m
+    [36m>[39m
+      [0mAll Departments[0m
+    [36m</option>[39m
+
+    (If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"admin-layout"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"sidebar"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"sidebar-header"[39m
+            [36m>[39m
+              [36m<h2>[39m
+                [0mAdmin Portal[0m
+              [36m</h2>[39m
+            [36m</div>[39m
+            [36m<nav[39m
+              [33mclass[39m=[32m"sidebar-nav"[39m
+            [36m>[39m
+              [36m<a[39m
+                [33mclass[39m=[32m"nav-link "[39m
+                [33mhref[39m=[32m"departments"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"nav-icon"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33mfill[39m=[32m"currentColor"[39m
+                    [33mheight[39m=[32m"1em"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-width[39m=[32m"0"[39m
+                    [33mviewBox[39m=[32m"0 0 512 512"[39m
+                    [33mwidth[39m=[32m"1em"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M256 368a16 16 0 0 1-7.94-2.11L108 285.84a8 8 0 0 0-12 6.94V368a16 16 0 0 0 8.23 14l144 80a16 16 0 0 0 15.54 0l144-80a16 16 0 0 0 8.23-14v-75.22a8 8 0 0 0-12-6.94l-140.06 80.05A16 16 0 0 1 256 368z"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M495.92 190.5v-.11a16 16 0 0 0-8-12.28l-224-128a16 16 0 0 0-15.88 0l-224 128a16 16 0 0 0 0 27.78l224 128a16 16 0 0 0 15.88 0L461 221.28a2 2 0 0 1 3 1.74v144.53c0 8.61 6.62 16 15.23 16.43A16 16 0 0 0 496 368V192a14.76 14.76 0 0 0-.08-1.5z"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</span>[39m
+                [0mDepartments[0m
+              [36m</a>[39m
+              [36m<a[39m
+                [33mclass[39m=[32m"nav-link "[39m
+                [33mhref[39m=[32m"courses"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"nav-icon"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33mfill[39m=[32m"currentColor"[39m
+                    [33mheight[39m=[32m"1em"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-width[39m=[32m"0"[39m
+                    [33mviewBox[39m=[32m"0 0 512 512"[39m
+                    [33mwidth[39m=[32m"1em"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M202.24 74C166.11 56.75 115.61 48.3 48 48a31.36 31.36 0 0 0-17.92 5.33A32 32 0 0 0 16 79.9V366c0 19.34 13.76 33.93 32 33.93 71.07 0 142.36 6.64 185.06 47a4.11 4.11 0 0 0 6.94-3V106.82a15.89 15.89 0 0 0-5.46-12A143 143 0 0 0 202.24 74zm279.68-20.7A31.33 31.33 0 0 0 464 48c-67.61.3-118.11 8.71-154.24 26a143.31 143.31 0 0 0-32.31 20.78 15.93 15.93 0 0 0-5.45 12v337.13a3.93 3.93 0 0 0 6.68 2.81c25.67-25.5 70.72-46.82 185.36-46.81a32 32 0 0 0 32-32v-288a32 32 0 0 0-14.12-26.61z"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</span>[39m
+                [0mCourses[0m
+              [36m</a>[39m
+              [36m<a[39m
+                [33mclass[39m=[32m"nav-link "[39m
+                [33mhref[39m=[32m"students"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"nav-icon"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33mfill[39m=[32m"currentColor"[39m
+                    [33mheight[39m=[32m"1em"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-width[39m=[32m"0"[39m
+                    [33mviewBox[39m=[32m"0 0 512 512"[39m
+                    [33mwidth[39m=[32m"1em"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M336 256c-20.56 0-40.44-9.18-56-25.84-15.13-16.25-24.37-37.92-26-61-1.74-24.62 5.77-47.26 21.14-63.76S312 80 336 80c23.83 0 45.38 9.06 60.7 25.52 15.47 16.62 23 39.22 21.26 63.63-1.67 23.11-10.9 44.77-26 61C376.44 246.82 356.57 256 336 256zm66-88zm65.83 264H204.18a27.71 27.71 0 0 1-22-10.67 30.22 30.22 0 0 1-5.26-25.79c8.42-33.81 29.28-61.85 60.32-81.08C264.79 297.4 299.86 288 336 288c36.85 0 71 9 98.71 26.05 31.11 19.13 52 47.33 60.38 81.55a30.27 30.27 0 0 1-5.32 25.78A27.68 27.68 0 0 1 467.83 432zM147 260c-35.19 0-66.13-32.72-69-72.93-1.42-20.6 5-39.65 18-53.62 12.86-13.83 31-21.45 51-21.45s38 7.66 50.93 21.57c13.1 14.08 19.5 33.09 18 53.52-2.87 40.2-33.8 72.91-68.93 72.91zm65.66 31.45c-17.59-8.6-40.42-12.9-65.65-12.9-29.46 0-58.07 7.68-80.57 21.62-25.51 15.83-42.67 38.88-49.6 66.71a27.39 27.39 0 0 0 4.79 23.36A25.32 25.32 0 0 0 41.72 400h111a8 8 0 0 0 7.87-6.57c.11-.63.25-1.26.41-1.88 8.48-34.06 28.35-62.84 57.71-83.82a8 8 0 0 0-.63-13.39c-1.57-.92-3.37-1.89-5.42-2.89z"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</span>[39m
+                [0mStudents[0m
+              [36m</a>[39m
+            [36m</nav>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"sidebar-footer"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"logout-btn"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mfill[39m=[32m"currentColor"[39m
+                  [33mheight[39m=[32m"1em"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-width[39m=[32m"0"[39m
+                  [33mviewBox[39m=[32m"0 0 512 512"[39m
+                  [33mwidth[39m=[32m"1em"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M160 256a16 16 0 0 1 16-16h144V136c0-32-33.79-56-64-56H104a56.06 56.06 0 0 0-56 56v240a56.06 56.06 0 0 0 56 56h160a56.06 56.06 0 0 0 56-56V272H176a16 16 0 0 1-16-16zm299.31-11.31-80-80a16 16 0 0 0-22.62 22.62L409.37 240H320v32h89.37l-52.68 52.69a16 16 0 1 0 22.62 22.62l80-80a16 16 0 0 0 0-22.62z"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [0m Logout[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"main-content"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"top-bar"[39m
+            [36m>[39m
+              [36m<h2>[39m
+                [0mDashboard[0m
+              [36m</h2>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"user-profile"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"avatar"[39m
+                [36m>[39m
+                  [0mA[0m
+                [36m</div>[39m
+                [36m<span>[39m
+                  [0mAdministrator[0m
+     ...
+
+    [0m [90m 30 |[39m
+     [90m 31 |[39m     [90m// Check for Navigation Items[39m
+    [31m[1m>[22m[39m[90m 32 |[39m     expect(screen[33m.[39mgetByText([35m/Departments/i[39m))[33m.[39mtoBeInTheDocument()[33m;[39m
+     [90m    |[39m                   [31m[1m^[22m[39m
+     [90m 33 |[39m     expect(screen[33m.[39mgetByText([35m/Courses/i[39m))[33m.[39mtoBeInTheDocument()[33m;[39m
+     [90m 34 |[39m     expect(screen[33m.[39mgetByText([35m/Students/i[39m))[33m.[39mtoBeInTheDocument()[33m;[39m
+     [90m 35 |[39m[0m
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at getElementError (node_modules/@testing-library/dom/dist/query-helpers.js:20:35)
+      at getMultipleElementsFoundError (node_modules/@testing-library/dom/dist/query-helpers.js:23:10)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+      at getByText (node_modules/@testing-library/dom/dist/query-helpers.js:95:19)
+      at Object.<anonymous> (src/admin/AdminDashboard.test.js:32:19)
+      at TestScheduler.scheduleTests (node_modules/@jest/core/build/TestScheduler.js:333:13)
+      at runJest (node_modules/@jest/core/build/runJest.js:404:19)
+      at _run10000 (node_modules/@jest/core/build/cli/index.js:320:7)
+      at runCLI (node_modules/@jest/core/build/cli/index.js:173:3)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 total
+Snapshots:   0 total
+Time:        1.134 s
+Ran all test suites matching /AdminDashboard.test.js/i.
