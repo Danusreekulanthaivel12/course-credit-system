@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUniversity, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
 import Button from './ui/Button';
@@ -8,6 +8,19 @@ const Navbar = () => {
     const role = localStorage.getItem("role");
     const userString = localStorage.getItem("user");
     const user = userString ? JSON.parse(userString) : {};
+    const [departmentName, setDepartmentName] = useState('');
+
+    useEffect(() => {
+        if (role === 'student' && user.dept_id) {
+            fetch("http://localhost:5000/departments")
+                .then(r => r.json())
+                .then(depts => {
+                    const deptObj = (Array.isArray(depts) ? depts : []).find(d => d.id === user.dept_id);
+                    if (deptObj) setDepartmentName(deptObj.name);
+                })
+                .catch(err => console.error("Could not fetch departments for navbar", err));
+        }
+    }, [role, user.dept_id]);
 
     const handleLogout = () => {
         if (window.confirm("Are you sure you want to logout?")) {
@@ -40,13 +53,27 @@ const Navbar = () => {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ textAlign: 'right', display: 'none', flexDirection: 'column', '@media(min-width: 640px)': { display: 'flex' } }}>
-                        <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{user.name || role.toUpperCase()}</span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'capitalize' }}>{role}</span>
+                {role === 'student' ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <FaUserCircle size={36} color="var(--text-secondary)" />
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--text)' }}>
+                                {user.name || 'Student'}
+                            </span>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                                {departmentName || 'Department'} &ndash; Semester {user.semester || '-'}
+                            </span>
+                        </div>
                     </div>
-                    <FaUserCircle size={32} color="var(--text-light)" />
-                </div>
+                ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ textAlign: 'right', display: 'none', flexDirection: 'column', '@media(min-width: 640px)': { display: 'flex' } }}>
+                            <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{user.name || role.toUpperCase()}</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'capitalize' }}>{role}</span>
+                        </div>
+                        <FaUserCircle size={32} color="var(--text-light)" />
+                    </div>
+                )}
                 {role !== 'admin' && (
                     <Button variant="secondary" onClick={handleLogout} style={{ fontSize: '0.875rem', padding: '0.4rem 0.8rem' }}>
                         <FaSignOutAlt /> Logout

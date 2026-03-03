@@ -8,6 +8,8 @@ const AdminDashboard = () => {
     { path: "departments", label: "Departments", icon: <IoSchool /> },
     { path: "courses", label: "Courses", icon: <IoBook /> },
     { path: "students", label: "Students", icon: <IoPeople /> },
+    { path: "addon-approvals", label: "Approvals (Add-On)", icon: <IoBook /> },
+    { path: "exception-approvals", label: "Approvals (Exception)", icon: <IoBook /> },
   ];
 
   const handleLogout = () => {

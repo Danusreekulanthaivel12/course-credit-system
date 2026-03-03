@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { IoCheckmarkCircle, IoInformationCircle, IoBook, IoAlertCircle, IoAddCircle, IoWarning } from "react-icons/io5";
+import { IoCheckmarkCircle, IoInformationCircle, IoBook, IoAlertCircle, IoAddCircle, IoWarning, IoPersonCircle } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
@@ -16,7 +16,7 @@ function StudentDashboard() {
     // Modal States
     const [isAddonModalOpen, setIsAddonModalOpen] = useState(false);
     const [isExceptionModalOpen, setIsExceptionModalOpen] = useState(false);
-    const [requestForm, setRequestForm] = useState({ course_name: '', details: '', course_type: 'Add-On', credits: '' });
+    const [requestForm, setRequestForm] = useState({ course_name: '', details: '', course_type: '', credits: '' });
 
     const { addToast } = useToast();
     const navigate = useNavigate();
@@ -114,7 +114,9 @@ function StudentDashboard() {
     };
 
     const handleRequestSubmit = async (type) => {
+        if (type === 'addon' && !requestForm.course_type) return addToast("Please select a Course Type", "error");
         if (!requestForm.course_name) return addToast("Course name is required", "error");
+        if (type === 'addon' && !requestForm.credits) return addToast("Credits are required", "error");
 
         try {
             const res = await fetch("http://localhost:5000/requests", {
@@ -136,7 +138,7 @@ function StudentDashboard() {
                 addToast("Request submitted successfully", "success");
                 setIsAddonModalOpen(false);
                 setIsExceptionModalOpen(false);
-                setRequestForm({ course_name: '', details: '', course_type: 'Add-On', credits: '' });
+                setRequestForm({ course_name: '', details: '', course_type: '', credits: '' });
                 fetchRequests();
             } else {
                 addToast("Failed to submit request", "error");
@@ -211,17 +213,23 @@ function StudentDashboard() {
                             <ul style={{ listStyle: 'none', marginBottom: '1.5rem' }}>
                                 {registeredCourses.map(c => (
                                     <li key={c.id} style={{
-                                        padding: '0.5rem 0',
+                                        padding: '0.75rem 0',
                                         borderBottom: '1px solid var(--border)',
                                         display: 'flex',
+                                        justifyContent: 'space-between',
                                         alignItems: 'center',
                                         gap: '0.5rem',
                                         fontSize: '0.9rem'
                                     }}>
-                                        <IoCheckmarkCircle style={{ color: 'var(--success)', flexShrink: 0 }} />
-                                        <div>
-                                            <div style={{ fontWeight: 500 }}>{c.course_code}</div>
-                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{c.course_name} <span className="badge badge-gray" style={{ fontSize: '0.6rem', padding: '0.1rem 0.4rem' }}>{c.type}</span></div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                            <IoCheckmarkCircle style={{ color: 'var(--success)', flexShrink: 0, fontSize: '1.2rem' }} />
+                                            <div>
+                                                <div style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--text)' }}>{c.course_name}</div>
+                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
+                                                    {c.course_code}
+                                                    <span className="badge badge-gray" style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem' }}>{c.type}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </li>
                                 ))}
@@ -233,19 +241,35 @@ function StudentDashboard() {
                             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>No active requests.</p>
                         ) : (
                             <ul style={{ listStyle: 'none' }}>
-                                {requests.map(r => (
-                                    <li key={r.id} style={{
-                                        padding: '0.5rem 0',
-                                        borderBottom: '1px solid var(--border)',
-                                        fontSize: '0.9rem'
-                                    }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <span style={{ fontWeight: 500 }}>{r.course_name}</span>
-                                            <span style={{ fontSize: '0.75rem', textTransform: 'capitalize', color: r.status === 'pending' ? 'var(--accent)' : 'var(--success)' }}>{r.status}</span>
-                                        </div>
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{r.request_type}</div>
-                                    </li>
-                                ))}
+                                {requests.map(r => {
+                                    let displayStatus = r.status === 'approved' ? 'Completed' : r.status;
+
+                                    if (r.request_type === 'exception' && r.status === 'approved') {
+                                        displayStatus = 'Course Excepted';
+                                    } else if (r.request_type === 'addon' && r.status === 'approved') {
+                                        const isExcepted = requests.some(req => req.request_type === 'exception' && req.status === 'approved' && req.details && req.details.description === r.course_name);
+                                        if (isExcepted) displayStatus = 'EXCEPTED';
+                                    }
+
+                                    return (
+                                        <li key={r.id} style={{
+                                            padding: '0.75rem 0',
+                                            borderBottom: '1px solid var(--border)',
+                                            fontSize: '0.9rem',
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center'
+                                        }}>
+                                            <div>
+                                                <div style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--text)' }}>{r.course_name}</div>
+                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'capitalize', marginTop: '0.2rem' }}>{r.request_type}</div>
+                                            </div>
+                                            <span style={{ fontSize: '0.85rem', fontWeight: 500, color: r.status === 'pending' ? 'var(--accent)' : 'var(--success)' }}>
+                                                {displayStatus}
+                                            </span>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         )}
                     </Card>
@@ -262,13 +286,17 @@ function StudentDashboard() {
                             <div className="grid grid-cols-1 md:grid-cols-2">
                                 {regularCourses.map(course => (
                                     <Card key={course.id} style={{ borderLeft: '4px solid var(--primary)' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                            <span className="badge badge-indigo">Regular</span>
-                                            <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{course.credits} Credits</span>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                                            <div>
+                                                <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.25rem', color: 'var(--text)' }}>{course.course_name}</h4>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                                                    {course.course_code}
+                                                    <span className="badge badge-indigo" style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem' }}>Regular</span>
+                                                </div>
+                                            </div>
+                                            <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{course.credits} Credits</span>
                                         </div>
-                                        <h4 style={{ fontSize: '1rem', marginBottom: '0.25rem' }}>{course.course_code}</h4>
-                                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>{course.course_name}</p>
-                                        <Button variant="secondary" disabled style={{ width: '100%', fontSize: '0.8rem' }}>Pre-Assigned</Button>
+                                        <Button variant="secondary" disabled style={{ width: '100%', fontSize: '0.85rem' }}>Pre-Assigned</Button>
                                     </Card>
                                 ))}
                             </div>
@@ -282,12 +310,16 @@ function StudentDashboard() {
                                     const isRegistered = registeredCourses.some(rc => rc.id === course.id);
                                     return (
                                         <Card key={course.id}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                                                <span className="badge badge-yellow">Elective</span>
-                                                <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{course.credits} Credits</span>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                                                <div>
+                                                    <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.25rem', color: 'var(--text)' }}>{course.course_name}</h4>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                                                        {course.course_code}
+                                                        <span className="badge badge-yellow" style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem' }}>Elective</span>
+                                                    </div>
+                                                </div>
+                                                <span style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{course.credits} Credits</span>
                                             </div>
-                                            <h4 style={{ fontSize: '1rem', marginBottom: '0.25rem' }}>{course.course_code}</h4>
-                                            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>{course.course_name}</p>
 
                                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                                 <Button
@@ -300,12 +332,17 @@ function StudentDashboard() {
                                                 </Button>
                                                 {/* Sem 7 Exception Request */}
                                                 {parseInt(student.semester) === 7 && !isRegistered && (
-                                                    <Button variant="secondary" onClick={() => {
-                                                        setRequestForm({ ...requestForm, course_name: course.course_name });
-                                                        setIsExceptionModalOpen(true);
-                                                    }} title="Request as Exception">
-                                                        <IoWarning />
-                                                    </Button>
+                                                    // Check if course is already excepted
+                                                    requests.some(r => r.course_name === course.course_name && r.request_type === 'exception' && r.status === 'approved') ? (
+                                                        <span style={{ color: 'var(--success)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', padding: '0 0.5rem' }}>Course Excepted</span>
+                                                    ) : (
+                                                        <Button variant="secondary" onClick={() => {
+                                                            setRequestForm({ ...requestForm, course_name: course.course_name });
+                                                            setIsExceptionModalOpen(true);
+                                                        }} title="Request as Exception">
+                                                            <IoWarning />
+                                                        </Button>
+                                                    )
                                                 )}
                                             </div>
                                         </Card>
@@ -387,8 +424,40 @@ function StudentDashboard() {
 
             {/* Add-On Course Modal */}
             <Modal isOpen={isAddonModalOpen} onClose={() => setIsAddonModalOpen(false)} title="Request Add-On Course">
+                {/* 1. Course Type (Radio Buttons) */}
                 <div className="form-group">
-                    <label className="form-label">Course Name</label>
+                    <label className="form-label" style={{ fontWeight: '600', marginBottom: '0.5rem', display: 'block' }}>
+                        Course Type <span style={{ color: 'red' }}>*</span>
+                    </label>
+                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                        {['NPTEL Exam', 'Internship', 'Add On Course'].map((type) => (
+                            <label key={type} style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                                padding: '0.5rem 1rem',
+                                border: requestForm.course_type === type ? '1px solid var(--primary)' : '1px solid var(--border)',
+                                borderRadius: '4px',
+                                background: requestForm.course_type === type ? 'var(--bg-main)' : 'white',
+                                cursor: 'pointer'
+                            }}>
+                                <input
+                                    type="radio"
+                                    name="courseType"
+                                    value={type}
+                                    checked={requestForm.course_type === type}
+                                    onChange={(e) => setRequestForm({ ...requestForm, course_type: e.target.value })}
+                                    style={{ accentColor: 'var(--primary)' }}
+                                />
+                                {type}
+                            </label>
+                        ))}
+                    </div>
+                </div>
+
+                {/* 2. Course Name */}
+                <div className="form-group">
+                    <label className="form-label">Course Name <span style={{ color: 'red' }}>*</span></label>
                     <input
                         type="text"
                         value={requestForm.course_name}
@@ -396,6 +465,20 @@ function StudentDashboard() {
                         placeholder="e.g. Advanced Python"
                     />
                 </div>
+
+                {/* 3. Course Credit */}
+                <div className="form-group">
+                    <label className="form-label">Course Credit <span style={{ color: 'red' }}>*</span></label>
+                    <input
+                        type="number"
+                        value={requestForm.credits}
+                        onChange={(e) => setRequestForm({ ...requestForm, credits: e.target.value })}
+                        placeholder="e.g. 3"
+                        min="1"
+                    />
+                </div>
+
+                {/* 4. Duration / Details */}
                 <div className="form-group">
                     <label className="form-label">Duration / Details</label>
                     <input
@@ -405,30 +488,8 @@ function StudentDashboard() {
                         placeholder="e.g. 4 Weeks"
                     />
                 </div>
-                <div className="form-group">
-                    <label className="form-label">Course Type</label>
-                    <select
-                        className="form-control"
-                        value={requestForm.course_type}
-                        onChange={(e) => setRequestForm({ ...requestForm, course_type: e.target.value })}
-                        style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-                    >
-                        <option value="Add-On">Add-On</option>
-                        <option value="Honor">Honor</option>
-                        <option value="Minor">Minor</option>
-                    </select>
-                </div>
-                <div className="form-group">
-                    <label className="form-label">Course Credit</label>
-                    <input
-                        type="number"
-                        value={requestForm.credits}
-                        onChange={(e) => setRequestForm({ ...requestForm, credits: e.target.value })}
-                        placeholder="e.g. 3"
-                        min="1"
-                    />
-                </div>
-                <Button variant="primary" style={{ width: '100%' }} onClick={() => handleRequestSubmit('addon')}>
+
+                <Button variant="primary" style={{ width: '100%', marginTop: '1rem' }} onClick={() => handleRequestSubmit('addon')}>
                     Submit Request
                 </Button>
             </Modal>
@@ -436,7 +497,7 @@ function StudentDashboard() {
             {/* Exception Request Modal */}
             <Modal isOpen={isExceptionModalOpen} onClose={() => setIsExceptionModalOpen(false)} title="Request Exception">
                 <div className="form-group">
-                    <label className="form-label">Course Name</label>
+                    <label className="form-label">Course Name (Elective to Replace)</label>
                     <input
                         type="text"
                         value={requestForm.course_name}
@@ -444,15 +505,64 @@ function StudentDashboard() {
                     />
                 </div>
                 <div className="form-group">
-                    <label className="form-label">Reason / Details</label>
-                    <textarea
-                        value={requestForm.details}
-                        onChange={(e) => setRequestForm({ ...requestForm, details: e.target.value })}
-                        placeholder="Why do you need this exception?"
-                        rows={3}
-                    />
+                    <label className="form-label">Select the course to be exempted</label>
+                    {(() => {
+                        const approvedAddons = requests.filter(r => r.request_type === 'addon' && r.status === 'approved');
+
+                        // Check if an exception already uses this addon
+                        // We must find addons that are NOT already mapped by an exception request.
+                        const unusedAddons = approvedAddons.filter(addon => {
+                            return !requests.some(req =>
+                                req.request_type === 'exception' &&
+                                req.status === 'approved' &&
+                                req.details &&
+                                req.details.description === addon.course_name
+                            );
+                        });
+
+                        if (unusedAddons.length === 0) {
+                            return (
+                                <div style={{ color: 'var(--danger)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                                    Not eligible for exemption (No available Add-On courses found)
+                                </div>
+                            );
+                        }
+
+                        // Auto-select the first unused addon if details is empty
+                        if (!requestForm.details && unusedAddons.length > 0) {
+                            setRequestForm(prev => ({ ...prev, details: unusedAddons[0].course_name }));
+                        }
+
+                        return (
+                            <select
+                                className="form-input"
+                                value={requestForm.details}
+                                onChange={(e) => setRequestForm({ ...requestForm, details: e.target.value })}
+                                style={{
+                                    width: '100%',
+                                    padding: '0.5rem',
+                                    border: '1px solid var(--border)',
+                                    borderRadius: '4px',
+                                    outline: 'none',
+                                    fontSize: '0.9rem'
+                                }}
+                            >
+                                <option value="" disabled>Select an Add-On Course</option>
+                                {unusedAddons.map(addon => (
+                                    <option key={addon.id} value={addon.course_name}>
+                                        {addon.course_name}
+                                    </option>
+                                ))}
+                            </select>
+                        );
+                    })()}
                 </div>
-                <Button variant="primary" style={{ width: '100%' }} onClick={() => handleRequestSubmit('exception')}>
+                <Button
+                    variant="primary"
+                    style={{ width: '100%' }}
+                    disabled={requests.filter(r => r.request_type === 'addon' && r.status === 'approved').filter(addon => !requests.some(req => req.request_type === 'exception' && req.status === 'approved' && req.details && req.details.description === addon.course_name)).length === 0 || !requestForm.details}
+                    onClick={() => handleRequestSubmit('exception')}
+                >
                     Submit Exception Request
                 </Button>
             </Modal>

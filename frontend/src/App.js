@@ -8,6 +8,9 @@ import DepartmentManagement from "./admin/DepartmentManagement";
 import CourseManagement from "./admin/CourseManagement";
 import StudentManagement from "./admin/StudentManagement";
 
+import AddOnApprovals from "./admin/AddOnApprovals";
+import ExceptionApprovals from "./admin/ExceptionApprovals";
+
 // Simple Protected Route
 const ProtectedRoute = ({ children, role }) => {
   const userRole = localStorage.getItem("role");
@@ -37,6 +40,8 @@ function App() {
               <Route path="departments" element={<DepartmentManagement />} />
               <Route path="courses" element={<CourseManagement />} />
               <Route path="students" element={<StudentManagement />} />
+              <Route path="addon-approvals" element={<AddOnApprovals />} />
+              <Route path="exception-approvals" element={<ExceptionApprovals />} />
             </Route>
             <Route
               path="/student/*"

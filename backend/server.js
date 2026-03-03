@@ -314,6 +314,22 @@ app.get("/registrations/stats", async (req, res) => {
 });
 
 // --- Course Requests (Add-On / Exception) ---
+
+// Admin: Get All Requests
+app.get("/requests", (req, res) => {
+  const sql = `
+    SELECT r.*, s.name as student_name, s.email, d.name as dept_name 
+    FROM course_requests r 
+    JOIN students s ON r.student_id = s.id 
+    LEFT JOIN departments d ON s.dept_id = d.id 
+    ORDER BY r.created_at DESC
+  `;
+  db.query(sql, (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json(result);
+  });
+});
+
 app.get("/requests/:student_id", (req, res) => {
   db.query("SELECT * FROM course_requests WHERE student_id = ? ORDER BY created_at DESC", [req.params.student_id], (err, result) => {
     if (err) return res.status(500).json(err);
@@ -327,10 +343,81 @@ app.post("/requests", (req, res) => {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
-  const sql = "INSERT INTO course_requests (student_id, course_name, request_type, details, status) VALUES (?, ?, ?, ?, 'pending')";
-  db.query(sql, [student_id, course_name, request_type, JSON.stringify(details || {})], (err, result) => {
+  // Check for existing approved exception requests
+  if (request_type === 'exception') {
+    // 1. Check if the elective course already has an approved exception
+    const checkElectiveSql = "SELECT * FROM course_requests WHERE student_id = ? AND course_name = ? AND request_type = 'exception' AND status = 'approved'";
+    db.query(checkElectiveSql, [student_id, course_name], (checkErr, checkResult) => {
+      if (checkErr) return res.status(500).json(checkErr);
+      if (checkResult.length > 0) {
+        return res.status(400).json({ message: "Exception already approved" });
+      }
+
+      // 2. Check if the selected Add-On course is already used in an approved exception
+      const addonCourseName = typeof details === 'string' ? details : details.description;
+      if (addonCourseName) {
+        const checkAddonSql = "SELECT * FROM course_requests WHERE student_id = ? AND request_type = 'exception' AND status = 'approved' AND JSON_EXTRACT(details, '$.description') = ?";
+        db.query(checkAddonSql, [student_id, addonCourseName], (addonErr, addonResult) => {
+          if (addonErr) return res.status(500).json(addonErr);
+          if (addonResult.length > 0) {
+            return res.status(400).json({ message: "Add-On course already used for an exception" });
+          }
+          insertRequest();
+        });
+      } else {
+        insertRequest();
+      }
+    });
+  } else {
+    insertRequest();
+  }
+
+  function insertRequest() {
+    const sql = "INSERT INTO course_requests (student_id, course_name, request_type, details, status) VALUES (?, ?, ?, ?, 'pending')";
+    db.query(sql, [student_id, course_name, request_type, JSON.stringify(details || {})], (err, result) => {
+      if (err) return res.status(500).json(err);
+      res.json({ message: "Request submitted successfully", id: result.insertId });
+    });
+  }
+});
+
+// Admin: Update Request Status
+// Admin: Update Request Status
+app.put("/requests/:id/status", (req, res) => {
+  const { status } = req.body;
+  if (!['approved', 'rejected'].includes(status)) {
+    return res.status(400).json({ message: "Invalid status" });
+  }
+
+  // 1. Fetch the request to check its type
+  db.query("SELECT * FROM course_requests WHERE id = ?", [req.params.id], (err, result) => {
     if (err) return res.status(500).json(err);
-    res.json({ message: "Request submitted successfully", id: result.insertId });
+    if (result.length === 0) return res.status(404).json({ message: "Request not found" });
+
+    const request = result[0];
+    let dbStatus = request.status; // Default to current status
+
+    // 2. Logic based on Request Type & Action
+    if (request.request_type === 'addon') {
+      if (status === 'approved') {
+        dbStatus = 'approved';
+      } else if (status === 'rejected') {
+        dbStatus = 'rejected';
+      }
+    } else {
+      // Exception or other types
+      if (status === 'approved') {
+        dbStatus = 'approved';
+      } else if (status === 'rejected') {
+        dbStatus = 'rejected';
+      }
+    }
+
+    // 3. Update DB
+    db.query("UPDATE course_requests SET status = ? WHERE id = ?", [dbStatus, req.params.id], (updateErr) => {
+      if (updateErr) return res.status(500).json(updateErr);
+      res.status(200).json({ success: true, status: status.toUpperCase(), message: `Request status updated to ${dbStatus}` });
+    });
   });
 });
 
