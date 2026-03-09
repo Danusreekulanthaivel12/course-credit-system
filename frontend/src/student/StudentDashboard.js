@@ -243,7 +243,18 @@ function StudentDashboard() {
 
                             if (!activeSpec) return null;
 
-                            const specCourses = courses.filter(c => c.dept_id === student.dept_id && c.semester === student.semester && c.type === activeSpec);
+                            // 1. Current semester specialization courses
+                            const currentSpecCourses = courses.filter(c => c.dept_id === student.dept_id && c.semester === student.semester && c.type === activeSpec);
+
+                            // 2. Previous semester registered specialization courses
+                            const prevSpecCourses = registeredCourses.filter(rc => rc.type === activeSpec && parseInt(rc.semester) < parseInt(student.semester));
+
+                            // Combine and filter out those used for exceptions
+                            const specCourses = [...currentSpecCourses, ...prevSpecCourses].filter(c => {
+                                // Exclude if used for an exception
+                                const isExcepted = requests.some(r => r.request_type === 'exception' && r.status === 'approved' && r.details && r.details.description === c.course_name);
+                                return !isExcepted;
+                            });
 
                             if (specCourses.length === 0) return null;
 
@@ -570,7 +581,39 @@ function StudentDashboard() {
                             );
                         });
 
-                        if (unusedAddons.length === 0) {
+                        // Auto-select the first unused option if details is empty
+                        const unusedOptions = [...unusedAddons];
+
+                        // Add eligible previous Honor courses
+                        // Rules: course_type = HONOR, completed (registered from previous sem), unused for exception
+                        // NEW FIX: If a student has completed AT LEAST ONE Honor course, all previous semester Honor courses from their dept become available.
+                        let eligibleHonorCourses = [];
+                        const hasCompletedHonor = registeredCourses.some(rc => {
+                            if (rc.type !== 'Honors') return false;
+                            const st = rc.status ? rc.status.toLowerCase() : 'registered';
+                            return st === 'registered' || st === 'approved' || st === 'completed';
+                        });
+
+                        if (hasCompletedHonor) {
+                            eligibleHonorCourses = courses.filter(c => {
+                                if (c.type !== 'Honors') return false;
+                                if (c.dept_id !== student.dept_id) return false;
+                                if (parseInt(c.semester) >= parseInt(student.semester)) return false;
+
+                                // Check if already used for exception
+                                const isUsed = requests.some(req =>
+                                    req.request_type === 'exception' &&
+                                    req.status === 'approved' &&
+                                    req.details &&
+                                    req.details.description === c.course_name
+                                );
+                                return !isUsed;
+                            });
+                        }
+
+                        unusedOptions.push(...eligibleHonorCourses);
+
+                        if (unusedOptions.length === 0) {
                             return (
                                 <div style={{ color: 'var(--danger)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
                                     Not eligible for exemption (No available Add-On courses found)
@@ -578,9 +621,8 @@ function StudentDashboard() {
                             );
                         }
 
-                        // Auto-select the first unused addon if details is empty
-                        if (!requestForm.details && unusedAddons.length > 0) {
-                            setRequestForm(prev => ({ ...prev, details: unusedAddons[0].course_name }));
+                        if (!requestForm.details && unusedOptions.length > 0) {
+                            setRequestForm(prev => ({ ...prev, details: unusedOptions[0].course_name }));
                         }
 
                         return (
@@ -597,10 +639,10 @@ function StudentDashboard() {
                                     fontSize: '0.9rem'
                                 }}
                             >
-                                <option value="" disabled>Select an Add-On Course</option>
-                                {unusedAddons.map(addon => (
-                                    <option key={addon.id} value={addon.course_name}>
-                                        {addon.course_name}
+                                <option value="" disabled>Select the course to be exempted</option>
+                                {unusedOptions.map(opt => (
+                                    <option key={opt.id || opt.course_code || opt.course_name} value={opt.course_name}>
+                                        {opt.course_name} {opt.type === 'Honors' ? '(Honor)' : '(Add-On)'}
                                     </option>
                                 ))}
                             </select>
@@ -610,7 +652,7 @@ function StudentDashboard() {
                 <Button
                     variant="primary"
                     style={{ width: '100%' }}
-                    disabled={requests.filter(r => r.request_type === 'addon' && r.status === 'approved').filter(addon => !requests.some(req => req.request_type === 'exception' && req.status === 'approved' && req.details && req.details.description === addon.course_name)).length === 0 || !requestForm.details}
+                    disabled={!requestForm.details}
                     onClick={() => handleRequestSubmit('exception')}
                 >
                     Submit Exception Request

@@ -427,7 +427,7 @@ app.put("/requests/:id/status", (req, res) => {
 
 app.get("/registrations/:student_id", (req, res) => {
   db.query(
-    "SELECT r.id, c.id as course_id, c.course_code, c.course_name, c.credits, c.type FROM registrations r JOIN courses c ON r.course_id = c.id WHERE r.student_id = ?",
+    "SELECT r.id, r.status, c.id as course_id, c.course_code, c.course_name, c.credits, c.type, c.semester FROM registrations r JOIN courses c ON r.course_id = c.id WHERE r.student_id = ?",
     [req.params.student_id],
     (err, result) => {
       if (err) return res.status(500).json(err);
