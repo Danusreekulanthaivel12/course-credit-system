@@ -207,11 +207,11 @@ function StudentDashboard() {
                         </div>
 
                         <h4 style={{ fontSize: '0.95rem', marginBottom: '0.75rem' }}>Registered Courses</h4>
-                        {registeredCourses.length === 0 ? (
-                            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>No courses registered yet.</p>
+                        {registeredCourses.filter(c => c.type === 'Elective').length === 0 ? (
+                            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>No elective courses registered yet.</p>
                         ) : (
                             <ul style={{ listStyle: 'none', marginBottom: '1.5rem' }}>
-                                {registeredCourses.map(c => (
+                                {registeredCourses.filter(c => c.type === 'Elective').map(c => (
                                     <li key={c.id} style={{
                                         padding: '0.75rem 0',
                                         borderBottom: '1px solid var(--border)',
@@ -235,6 +235,56 @@ function StudentDashboard() {
                                 ))}
                             </ul>
                         )}
+
+                        {(() => {
+                            const hasMinor = registeredCourses.some(c => c.type === 'Minor');
+                            const hasHonor = registeredCourses.some(c => c.type === 'Honors');
+                            const activeSpec = hasMinor ? 'Minor' : (hasHonor ? 'Honors' : null);
+
+                            if (!activeSpec) return null;
+
+                            const specCourses = courses.filter(c => c.dept_id === student.dept_id && c.semester === student.semester && c.type === activeSpec);
+
+                            if (specCourses.length === 0) return null;
+
+                            return (
+                                <div style={{ marginBottom: '1.5rem' }}>
+                                    <h4 style={{ fontSize: '0.95rem', marginBottom: '0.75rem', textTransform: 'capitalize' }}>
+                                        Selected Specialization ({activeSpec === 'Honors' ? 'Honor' : 'Minor'})
+                                    </h4>
+                                    <ul style={{ listStyle: 'none' }}>
+                                        {specCourses.map(c => {
+                                            const reg = registeredCourses.find(rc => rc.id === c.id);
+                                            let status = 'Pending';
+                                            if (reg) {
+                                                status = reg.status ? (reg.status.charAt(0).toUpperCase() + reg.status.slice(1)) : 'Registered';
+                                                if (status.toLowerCase() === 'approved') status = 'Completed';
+                                            } else {
+                                                const isExcepted = requests.some(r => r.course_name === c.course_name && r.request_type === 'exception' && r.status === 'approved');
+                                                if (isExcepted) status = 'Excepted';
+                                            }
+
+                                            return (
+                                                <li key={c.id} style={{
+                                                    padding: '0.75rem 0',
+                                                    borderBottom: '1px solid var(--border)',
+                                                    fontSize: '0.9rem',
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center'
+                                                }}>
+                                                    <div>
+                                                        <div style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text)' }}>{c.course_code}</div>
+                                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>{c.course_name}</div>
+                                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>{c.credits} Credits</div>
+                                                    </div>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </div>
+                            );
+                        })()}
 
                         <h4 style={{ fontSize: '0.95rem', marginBottom: '0.75rem' }}>My Add-On / Requests</h4>
                         {requests.length === 0 ? (
