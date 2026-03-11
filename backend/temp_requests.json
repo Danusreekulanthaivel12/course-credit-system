@@ -1,0 +1,42 @@
+[
+  {
+    "request_type": "addon",
+    "status": "approved",
+    "course_name": "Physics-4",
+    "details": {
+      "credits": "3",
+      "course_type": "Add On Course",
+      "description": "12 weeks"
+    }
+  },
+  {
+    "request_type": "addon",
+    "status": "rejected",
+    "course_name": "Wind Energy",
+    "details": {
+      "credits": "4",
+      "course_type": "NPTEL Exam",
+      "description": "3"
+    }
+  },
+  {
+    "request_type": "exception",
+    "status": "approved",
+    "course_name": "Micro Irrigation",
+    "details": {
+      "credits": "",
+      "course_type": "",
+      "description": "Physics-4"
+    }
+  },
+  {
+    "request_type": "exception",
+    "status": "approved",
+    "course_name": "Water Harvesting Techniques",
+    "details": {
+      "credits": "",
+      "course_type": "",
+      "description": "Physics-4"
+    }
+  }
+]

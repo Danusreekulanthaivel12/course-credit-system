@@ -1,0 +1,42 @@
+[
+  {
+    "request_type": "addon",
+    "status": "approved",
+    "course_name": "C",
+    "details": {
+      "credits": "3",
+      "course_type": "NPTEL Exam",
+      "description": "4 weeks"
+    }
+  },
+  {
+    "request_type": "addon",
+    "status": "Completed",
+    "course_name": "Advanced Python",
+    "details": {
+      "credits": "3",
+      "course_type": "NPTEL Exam",
+      "description": "C"
+    }
+  },
+  {
+    "request_type": "addon",
+    "status": "Completed",
+    "course_name": "Java",
+    "details": {
+      "credits": "3",
+      "course_type": "NPTEL Exam",
+      "description": "C-3 weeks"
+    }
+  },
+  {
+    "request_type": "exception",
+    "status": "Pending - Department Head Approval",
+    "course_name": "Course 1",
+    "details": {
+      "credits": "",
+      "course_type": "",
+      "description": "C"
+    }
+  }
+]

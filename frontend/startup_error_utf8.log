@@ -1,0 +1,88 @@
+﻿
+> frontend@0.1.0 start
+> react-scripts start
+
+node.exe : (node:19348) [DEP_
+WEBPACK_DEV_SERVER_ON_AFTER_S
+ETUP_MIDDLEWARE] 
+DeprecationWarning: 
+'onAfterSetupMiddleware' 
+option is deprecated. Please 
+use the 'setupMiddlewares' 
+option.
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified    : 
+((node:19348) [D.    
+..ewares' option.:S    
+tring) [], RemoteEx    
+ception
+    + FullyQualifiedErr    
+orId : NativeComman    dError
+ 
+(Use `node 
+--trace-deprecation ...` to 
+show where the warning was 
+created)
+(node:19348) [DEP_WEBPACK_DEV
+_SERVER_ON_BEFORE_SETUP_MIDDL
+EWARE] DeprecationWarning: 
+'onBeforeSetupMiddleware' 
+option is deprecated. Please 
+use the 'setupMiddlewares' 
+option.
+Starting the development server...
+
+Compiled with warnings.
+
+[eslint] 
+src\admin\AddOnApprovals.js
+  Line 25:8:  React Hook useEffect has a missing dependency: 'fetchRequests'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\admin\CourseManagement.js
+  Line 81:8:  React Hook useEffect has a missing dependency: 'fetchCoursesAndLimit'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\admin\DepartmentHeadManagement.js
+  Line 52:8:  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\admin\DepartmentManagement.js
+  Line 37:8:  React Hook useEffect has a missing dependency: 'fetchDepartments'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\admin\ExceptionApprovals.js
+  Line 25:8:  React Hook useEffect has a missing dependency: 'fetchRequests'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\admin\StudentManagement.js
+  Line 58:8:  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+[1m[33mWARNING[39m[22m in [1m[eslint] 
+src\admin\AddOnApprovals.js
+  Line 25:8:  React Hook useEffect has a missing dependency: 'fetchRequests'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\admin\CourseManagement.js
+  Line 81:8:  React Hook useEffect has a missing dependency: 'fetchCoursesAndLimit'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\admin\DepartmentHeadManagement.js
+  Line 52:8:  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\admin\DepartmentManagement.js
+  Line 37:8:  React Hook useEffect has a missing dependency: 'fetchDepartments'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\admin\ExceptionApprovals.js
+  Line 25:8:  React Hook useEffect has a missing dependency: 'fetchRequests'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\admin\StudentManagement.js
+  Line 58:8:  React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+[39m[22m
+
+webpack compiled with [1m[33m1 warning[39m[22m

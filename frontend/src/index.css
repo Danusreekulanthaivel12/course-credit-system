@@ -163,6 +163,15 @@ p {
   background-color: #059669;
 }
 
+.btn-accent {
+  background-color: var(--accent);
+  color: white;
+}
+
+.btn-accent:hover {
+  background-color: #D97706; /* Amber 600 */
+}
+
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;

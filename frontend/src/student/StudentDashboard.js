@@ -95,6 +95,8 @@ function StudentDashboard() {
         }
 
         try {
+            // Optimistically disable the button by instantly identifying it as registered
+            // Or wait for the API - we will wait for API to be safe, but just add it to the list.
             const res = await fetch("http://localhost:5000/registrations", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -103,10 +105,22 @@ function StudentDashboard() {
             const data = await res.json();
 
             if (res.status === 201) {
+                // Instantly update the UI state so it doesn't wait for the fetch
+                setRegisteredCourses(prev => [...prev, { ...course, course_id: course.id, status: 'Registered' }]);
+                
                 await fetchRegisteredCourses();
                 addToast("Course registered successfully!", "success");
             } else {
                 addToast(data.message || "Registration failed", "error");
+                if (res.status === 409 || (data.message && data.message.includes("Already registered"))) {
+                     setRegisteredCourses(prev => {
+                          if (!prev.some(rc => rc.course_id === course.id || rc.id === course.id)) {
+                               return [...prev, { ...course, course_id: course.id, status: 'Registered' }];
+                          }
+                          return prev;
+                     });
+                     await fetchRegisteredCourses();
+                }
             }
         } catch (error) {
             addToast("Network error", "error");
@@ -169,6 +183,12 @@ function StudentDashboard() {
 
     const creditPercentage = Math.min((usedCredits / creditLimit) * 100, 100);
 
+    // Honor and Minor Flags
+    const hasHonor = registeredCourses.some(c => c.type === 'Honors');
+    const hasMinor = registeredCourses.some(c => c.type === 'Minor');
+    const honorCourses = courses.filter(c => c.type === 'Honors' && c.dept_id === student.dept_id && c.semester === student.semester);
+    const minorCourses = courses.filter(c => c.type === 'Minor' && c.dept_id === student.dept_id && c.semester === student.semester);
+
     return (
         <div>
             {/* Top Actions: Add-On Request */}
@@ -206,96 +226,59 @@ function StudentDashboard() {
                             </p>
                         </div>
 
-                        <h4 style={{ fontSize: '0.95rem', marginBottom: '0.75rem' }}>Registered Courses</h4>
-                        {registeredCourses.filter(c => c.type === 'Elective').length === 0 ? (
-                            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>No elective courses registered yet.</p>
-                        ) : (
-                            <ul style={{ listStyle: 'none', marginBottom: '1.5rem' }}>
-                                {registeredCourses.filter(c => c.type === 'Elective').map(c => (
-                                    <li key={c.id} style={{
-                                        padding: '0.75rem 0',
-                                        borderBottom: '1px solid var(--border)',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                        fontSize: '0.9rem'
-                                    }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                            <IoCheckmarkCircle style={{ color: 'var(--success)', flexShrink: 0, fontSize: '1.2rem' }} />
-                                            <div>
-                                                <div style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--text)' }}>{c.course_name}</div>
-                                                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.2rem' }}>
-                                                    {c.course_code}
-                                                    <span className="badge badge-gray" style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem' }}>{c.type}</span>
-                                                </div>
-                                            </div>
-                                        </div>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '0.5rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>Registered Courses</h3>
+
+                        {/* Elective Courses */}
+                        <div style={{ marginBottom: '1.5rem', marginTop: '1rem' }}>
+                            <h4 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--text)' }}>Elective Courses</h4>
+                            {registeredCourses.filter(c => c.type === 'Elective').length === 0 ? (
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>No elective courses registered yet.</p>
+                            ) : (
+                                <ul style={{ listStyle: 'none', paddingLeft: '0.5rem' }}>
+                                    {registeredCourses.filter(c => c.type === 'Elective').map(c => (
+                                        <li key={c.id} style={{ padding: '0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
+                                            <span style={{ color: 'var(--text-secondary)', fontSize: '1.5rem', lineHeight: '1rem' }}>•</span> {c.course_name}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+
+                        {/* Honor Courses Logic */}
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <h4 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--text)' }}>Honor Courses</h4>
+                            <ul style={{ listStyle: 'none', paddingLeft: '0.5rem' }}>
+                                {!hasHonor ? (
+                                    <li style={{ padding: '0.25rem 0', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                                        <span style={{ color: 'var(--text-secondary)', fontSize: '1.5rem', lineHeight: '1rem' }}>•</span> Not Selected
                                     </li>
-                                ))}
+                                ) : (
+                                    honorCourses.map(c => (
+                                        <li key={c.id} style={{ padding: '0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
+                                            <span style={{ color: 'var(--text)', fontSize: '1.5rem', lineHeight: '1rem' }}>•</span> {c.course_name}
+                                        </li>
+                                    ))
+                                )}
                             </ul>
-                        )}
+                        </div>
 
-                        {(() => {
-                            const hasMinor = registeredCourses.some(c => c.type === 'Minor');
-                            const hasHonor = registeredCourses.some(c => c.type === 'Honors');
-                            const activeSpec = hasMinor ? 'Minor' : (hasHonor ? 'Honors' : null);
-
-                            if (!activeSpec) return null;
-
-                            // 1. Current semester specialization courses
-                            const currentSpecCourses = courses.filter(c => c.dept_id === student.dept_id && c.semester === student.semester && c.type === activeSpec);
-
-                            // 2. Previous semester registered specialization courses
-                            const prevSpecCourses = registeredCourses.filter(rc => rc.type === activeSpec && parseInt(rc.semester) < parseInt(student.semester));
-
-                            // Combine and filter out those used for exceptions
-                            const specCourses = [...currentSpecCourses, ...prevSpecCourses].filter(c => {
-                                // Exclude if used for an exception
-                                const isExcepted = requests.some(r => r.request_type === 'exception' && r.status === 'approved' && r.details && r.details.description === c.course_name);
-                                return !isExcepted;
-                            });
-
-                            if (specCourses.length === 0) return null;
-
-                            return (
-                                <div style={{ marginBottom: '1.5rem' }}>
-                                    <h4 style={{ fontSize: '0.95rem', marginBottom: '0.75rem', textTransform: 'capitalize' }}>
-                                        Selected Specialization ({activeSpec === 'Honors' ? 'Honor' : 'Minor'})
-                                    </h4>
-                                    <ul style={{ listStyle: 'none' }}>
-                                        {specCourses.map(c => {
-                                            const reg = registeredCourses.find(rc => rc.id === c.id);
-                                            let status = 'Pending';
-                                            if (reg) {
-                                                status = reg.status ? (reg.status.charAt(0).toUpperCase() + reg.status.slice(1)) : 'Registered';
-                                                if (status.toLowerCase() === 'approved') status = 'Completed';
-                                            } else {
-                                                const isExcepted = requests.some(r => r.course_name === c.course_name && r.request_type === 'exception' && r.status === 'approved');
-                                                if (isExcepted) status = 'Excepted';
-                                            }
-
-                                            return (
-                                                <li key={c.id} style={{
-                                                    padding: '0.75rem 0',
-                                                    borderBottom: '1px solid var(--border)',
-                                                    fontSize: '0.9rem',
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between',
-                                                    alignItems: 'center'
-                                                }}>
-                                                    <div>
-                                                        <div style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--text)' }}>{c.course_code}</div>
-                                                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>{c.course_name}</div>
-                                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>{c.credits} Credits</div>
-                                                    </div>
-                                                </li>
-                                            );
-                                        })}
-                                    </ul>
-                                </div>
-                            );
-                        })()}
+                        {/* Minor Courses Logic */}
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <h4 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--text)' }}>Minor Courses</h4>
+                            <ul style={{ listStyle: 'none', paddingLeft: '0.5rem' }}>
+                                {!hasMinor ? (
+                                    <li style={{ padding: '0.25rem 0', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                                        <span style={{ color: 'var(--text-secondary)', fontSize: '1.5rem', lineHeight: '1rem' }}>•</span> Not Selected
+                                    </li>
+                                ) : (
+                                    minorCourses.map(c => (
+                                        <li key={c.id} style={{ padding: '0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
+                                            <span style={{ color: 'var(--text)', fontSize: '1.5rem', lineHeight: '1rem' }}>•</span> {c.course_name}
+                                        </li>
+                                    ))
+                                )}
+                            </ul>
+                        </div>
 
                         <h4 style={{ fontSize: '0.95rem', marginBottom: '0.75rem' }}>My Add-On / Requests</h4>
                         {requests.length === 0 ? (
@@ -381,7 +364,23 @@ function StudentDashboard() {
                             <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>Electives</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2">
                                 {electiveCourses.map(course => {
-                                    const isRegistered = registeredCourses.some(rc => rc.id === course.id);
+                                    const isRegistered = registeredCourses.some(rc => rc.course_id === course.id || rc.id === course.id);
+                                    const isExcepted = requests.some(r => r.course_name === course.course_name && r.request_type === 'exception' && (r.status === 'approved' || r.status === 'Excepted'));
+
+                                    let btnText = "Register";
+                                    let btnVariant = "primary";
+                                    let isDisabled = false;
+
+                                    if (isExcepted) {
+                                        btnText = "Course Excepted";
+                                        btnVariant = "accent";
+                                        isDisabled = true;
+                                    } else if (isRegistered) {
+                                        btnText = "Registered";
+                                        btnVariant = "success";
+                                        isDisabled = true;
+                                    }
+
                                     return (
                                         <Card key={course.id}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
@@ -397,26 +396,21 @@ function StudentDashboard() {
 
                                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                                 <Button
-                                                    variant={isRegistered ? "secondary" : "primary"}
-                                                    disabled={isRegistered}
+                                                    variant={btnVariant}
+                                                    disabled={isDisabled}
                                                     onClick={() => handleRegister(course)}
                                                     style={{ flex: 1 }}
                                                 >
-                                                    {isRegistered ? "Registered" : "Register"}
+                                                    {btnText}
                                                 </Button>
                                                 {/* Sem 7 Exception Request */}
-                                                {parseInt(student.semester) === 7 && !isRegistered && (
-                                                    // Check if course is already excepted
-                                                    requests.some(r => r.course_name === course.course_name && r.request_type === 'exception' && r.status === 'approved') ? (
-                                                        <span style={{ color: 'var(--success)', fontSize: '0.9rem', display: 'flex', alignItems: 'center', padding: '0 0.5rem' }}>Course Excepted</span>
-                                                    ) : (
-                                                        <Button variant="secondary" onClick={() => {
-                                                            setRequestForm({ ...requestForm, course_name: course.course_name });
-                                                            setIsExceptionModalOpen(true);
-                                                        }} title="Request as Exception">
-                                                            <IoWarning />
-                                                        </Button>
-                                                    )
+                                                {parseInt(student.semester) === 7 && isRegistered && !isExcepted && (
+                                                    <Button variant="secondary" onClick={() => {
+                                                        setRequestForm({ ...requestForm, course_name: course.course_name });
+                                                        setIsExceptionModalOpen(true);
+                                                    }} title="Request as Exception">
+                                                        <IoWarning />
+                                                    </Button>
                                                 )}
                                             </div>
                                         </Card>
@@ -454,19 +448,31 @@ function StudentDashboard() {
                                                 No {specializationType} courses available.
                                             </div>
                                         ) : displayedSpecializationCourses.map(course => {
-                                            const isRegistered = registeredCourses.some(rc => rc.id === course.id);
+                                            const isRegistered = registeredCourses.some(rc => rc.course_id === course.id || rc.id === course.id);
+                                            const isExcepted = requests.some(r => r.course_name === course.course_name && r.request_type === 'exception' && (r.status === 'approved' || r.status === 'Excepted'));
                                             const hasMinor = registeredCourses.some(c => c.type === 'Minor');
                                             const hasHonor = registeredCourses.some(c => c.type === 'Honors');
                                             const isMinor = course.type === 'Minor';
 
-                                            let isDisabled = isRegistered;
-                                            if (!isRegistered) {
+                                            let isDisabled = isRegistered || isExcepted;
+                                            if (!isRegistered && !isExcepted) {
                                                 // Mutually Exclusive Logic
-                                                if (isMinor && hasHonor) isDisabled = true;
-                                                if (!isMinor && hasMinor) isDisabled = true; // Honors disabled if Minor taken
-                                                if (isMinor && hasMinor) isDisabled = true;  // Minor disabled if Minor taken (only 1 allowed usually, or logic allows multiple minors?) 
-                                                // User ref: "Allow selection of ONLY ONE (Honor OR Minor)" -> Singular.
-                                                if (!isMinor && hasHonor) isDisabled = true; // Honors disabled if Honors taken
+                                                if (hasHonor || hasMinor) isDisabled = true; // Disable ALL other Honor/Minor courses if one is taken
+                                            }
+
+                                            let btnText = "Register";
+                                            let btnVariant = "primary";
+
+                                            const isTrackRegistered = (course.type === 'Honors' && hasHonor) || (course.type === 'Minor' && hasMinor);
+
+                                            if (isExcepted) {
+                                                btnText = "Course Excepted";
+                                                btnVariant = "accent";
+                                            } else if (isRegistered || isTrackRegistered) {
+                                                btnText = "Registered";
+                                                btnVariant = "success";
+                                            } else if (isDisabled) {
+                                                btnText = "Unavailable";
                                             }
 
                                             return (
@@ -478,12 +484,12 @@ function StudentDashboard() {
                                                     <h4 style={{ fontSize: '1rem', marginBottom: '0.25rem' }}>{course.course_code}</h4>
                                                     <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>{course.course_name}</p>
                                                     <Button
-                                                        variant={isRegistered ? "secondary" : "primary"}
+                                                        variant={btnVariant}
                                                         disabled={isDisabled}
                                                         onClick={() => handleRegister(course)}
                                                         style={{ width: '100%' }}
                                                     >
-                                                        {isRegistered ? "Registered" : (isDisabled ? "Unavailable" : "Select")}
+                                                        {btnText}
                                                     </Button>
                                                 </Card>
                                             );
@@ -581,14 +587,14 @@ function StudentDashboard() {
                 <div className="form-group">
                     <label className="form-label">Select the course to be exempted</label>
                     {(() => {
-                        const approvedAddons = requests.filter(r => r.request_type === 'addon' && r.status === 'approved');
+                        const approvedAddons = requests.filter(r => r.request_type === 'addon' && (r.status === 'approved' || r.status === 'Completed'));
 
                         // Check if an exception already uses this addon
                         // We must find addons that are NOT already mapped by an exception request.
                         const unusedAddons = approvedAddons.filter(addon => {
                             return !requests.some(req =>
                                 req.request_type === 'exception' &&
-                                req.status === 'approved' &&
+                                (req.status === 'approved' || req.status === 'Excepted') &&
                                 req.details &&
                                 req.details.description === addon.course_name
                             );
@@ -608,9 +614,10 @@ function StudentDashboard() {
                         });
 
                         if (hasCompletedHonor) {
-                            eligibleHonorCourses = courses.filter(c => {
+                            eligibleHonorCourses = registeredCourses.filter(c => {
                                 if (c.type !== 'Honors') return false;
-                                if (c.dept_id !== student.dept_id) return false;
+                                // The endpoint already ensures these courses belong to the student
+                                // Checking semester: must be from a previous semester
                                 if (parseInt(c.semester) >= parseInt(student.semester)) return false;
 
                                 // Check if already used for exception

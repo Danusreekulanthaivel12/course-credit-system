@@ -560,7 +560,7 @@ app.put("/requests/:id/status", (req, res) => {
 
 app.get("/registrations/:student_id", (req, res) => {
   db.query(
-    "SELECT r.id, r.status, c.id as course_id, c.course_code, c.course_name, c.credits, c.type, c.semester FROM registrations r JOIN courses c ON r.course_id = c.id WHERE r.student_id = ?",
+    "SELECT r.id, 'Registered' as status, c.id as course_id, c.course_code, c.course_name, c.credits, c.type, c.semester FROM registrations r JOIN courses c ON r.course_id = c.id WHERE r.student_id = ?",
     [req.params.student_id],
     (err, result) => {
       if (err) return res.status(500).json(err);
@@ -607,9 +607,10 @@ app.post("/registrations", async (req, res) => {
             FROM registrations r 
             JOIN courses c ON r.course_id = c.id 
             WHERE r.student_id = ? AND c.type = 'Elective'`, [student_id]);
-      const registeredElectiveCredits = registeredElectives[0].total || 0;
-
-      const totalCredits = registeredElectiveCredits + course.credits;
+      
+      const registeredElectiveCredits = parseInt(registeredElectives[0].total) || 0;
+      const newCourseCredits = parseInt(course.credits) || 0;
+      const totalCredits = registeredElectiveCredits + newCourseCredits;
 
       if (totalCredits > creditLimit) {
         return res.status(400).json({
