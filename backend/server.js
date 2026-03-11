@@ -35,6 +35,15 @@ app.post("/login", (req, res) => {
         res.status(401).json({ message: "Invalid Admin Credentials" });
       }
     });
+  } else if (role === "department_head") {
+    db.query("SELECT * FROM department_heads WHERE username = ? AND password = ?", [username, password], (err, result) => {
+      if (err) return res.status(500).json(err);
+      if (result.length > 0) {
+        res.json({ success: true, role: "department_head", user: result[0] });
+      } else {
+        res.status(401).json({ message: "Invalid Department Head Credentials" });
+      }
+    });
   } else if (role === "student") {
     db.query("SELECT * FROM students WHERE email = ? AND password = ?", [username, password], (err, result) => {
       if (err) return res.status(500).json(err);
@@ -315,16 +324,33 @@ app.get("/registrations/stats", async (req, res) => {
 
 // --- Course Requests (Add-On / Exception) ---
 
-// Admin: Get All Requests
+// Admin: Get All Requests (Only those approved by Dept Head)
 app.get("/requests", (req, res) => {
   const sql = `
     SELECT r.*, s.name as student_name, s.email, d.name as dept_name 
     FROM course_requests r 
     JOIN students s ON r.student_id = s.id 
     LEFT JOIN departments d ON s.dept_id = d.id 
+    WHERE r.status = 'Pending - Admin Approval'
     ORDER BY r.created_at DESC
   `;
   db.query(sql, (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json(result);
+  });
+});
+
+// Dept Head: Get Requests for specific department
+app.get("/requests/department/:dept_id", (req, res) => {
+  const sql = `
+    SELECT r.*, s.name as student_name, s.email, s.semester, d.name as dept_name 
+    FROM course_requests r 
+    JOIN students s ON r.student_id = s.id 
+    LEFT JOIN departments d ON s.dept_id = d.id 
+    WHERE s.dept_id = ? AND r.status = 'Pending - Department Head Approval'
+    ORDER BY r.created_at DESC
+  `;
+  db.query(sql, [req.params.dept_id], (err, result) => {
     if (err) return res.status(500).json(err);
     res.json(result);
   });
@@ -373,7 +399,7 @@ app.post("/requests", (req, res) => {
   }
 
   function insertRequest() {
-    const sql = "INSERT INTO course_requests (student_id, course_name, request_type, details, status) VALUES (?, ?, ?, ?, 'pending')";
+    const sql = "INSERT INTO course_requests (student_id, course_name, request_type, details, status) VALUES (?, ?, ?, ?, 'Pending - Department Head Approval')";
     db.query(sql, [student_id, course_name, request_type, JSON.stringify(details || {})], (err, result) => {
       if (err) return res.status(500).json(err);
       res.json({ message: "Request submitted successfully", id: result.insertId });
@@ -381,11 +407,11 @@ app.post("/requests", (req, res) => {
   }
 });
 
-// Admin: Update Request Status
-// Admin: Update Request Status
+// Update Request Status
 app.put("/requests/:id/status", (req, res) => {
-  const { status } = req.body;
-  if (!['approved', 'rejected'].includes(status)) {
+  const { status, role } = req.body; // status is 'Approve' or 'Reject' from the frontend
+
+  if (!['Approve', 'Reject', 'approved', 'rejected'].includes(status)) {
     return res.status(400).json({ message: "Invalid status" });
   }
 
@@ -396,27 +422,43 @@ app.put("/requests/:id/status", (req, res) => {
 
     const request = result[0];
     let dbStatus = request.status; // Default to current status
+    const currentStatus = request.status;
 
-    // 2. Logic based on Request Type & Action
-    if (request.request_type === 'addon') {
-      if (status === 'approved') {
-        dbStatus = 'approved';
-      } else if (status === 'rejected') {
-        dbStatus = 'rejected';
+    // We normalize the incoming status to lowercase 'approve' or 'reject' for easier processing
+    const action = status.toLowerCase() === 'approved' ? 'approve' : (status.toLowerCase() === 'rejected' ? 'reject' : status.toLowerCase());
+
+
+    // 2. Logic based on Request Type & Action & Role
+    if (currentStatus === 'Pending - Department Head Approval') {
+      if (role !== 'department_head') return res.status(403).json({ message: "Unauthorized role for this action" });
+      if (action === 'approve') {
+        dbStatus = 'Pending - Admin Approval';
+      } else if (action === 'reject') {
+        dbStatus = 'Rejected by Department Head';
+      }
+    } else if (currentStatus === 'Pending - Admin Approval') {
+      if (role !== 'admin') return res.status(403).json({ message: "Unauthorized role for this action" });
+      if (action === 'approve') {
+        // Final completion state
+        if (request.request_type === 'addon') {
+          dbStatus = 'Completed';
+        } else {
+          dbStatus = 'Excepted';
+        }
+      } else if (action === 'reject') {
+        dbStatus = 'Rejected by Admin';
       }
     } else {
-      // Exception or other types
-      if (status === 'approved') {
-        dbStatus = 'approved';
-      } else if (status === 'rejected') {
-        dbStatus = 'rejected';
+      // Support for existing basic 'pending' -> 'approved' / 'rejected' flow just in case of old data
+      if (currentStatus === 'pending') {
+        dbStatus = action === 'approve' ? 'approved' : 'rejected';
       }
     }
 
     // 3. Update DB
     db.query("UPDATE course_requests SET status = ? WHERE id = ?", [dbStatus, req.params.id], (updateErr) => {
       if (updateErr) return res.status(500).json(updateErr);
-      res.status(200).json({ success: true, status: status.toUpperCase(), message: `Request status updated to ${dbStatus}` });
+      res.status(200).json({ success: true, status: action.toUpperCase(), message: `Request status updated to ${dbStatus}` });
     });
   });
 });

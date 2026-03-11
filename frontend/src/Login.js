@@ -23,7 +23,13 @@ const Login = () => {
         localStorage.setItem("role", res.data.role);
         localStorage.setItem("user", JSON.stringify(res.data.user));
         addToast(`Welcome back, ${res.data.user.name || "User"}!`, "success");
-        navigate(res.data.role === "admin" ? "/admin" : "/student");
+        if (res.data.role === "admin") {
+          navigate("/admin");
+        } else if (res.data.role === "department_head") {
+          navigate("/department-head");
+        } else {
+          navigate("/student");
+        }
       } else {
         addToast("Invalid credentials", "error");
       }
@@ -57,7 +63,7 @@ const Login = () => {
         </div>
 
         <div style={{
-          display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.5rem"
+          display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem", marginBottom: "1.5rem"
         }}>
           <div
             onClick={() => setRole("student")}
@@ -83,6 +89,18 @@ const Login = () => {
             <FaChalkboardTeacher size={24} color={role === 'admin' ? 'var(--primary)' : 'var(--text-light)'} />
             <div style={{ marginTop: "0.5rem", fontWeight: 600, fontSize: "0.9rem", color: role === 'admin' ? 'var(--primary)' : 'var(--text-secondary)' }}>Admin</div>
           </div>
+          <div
+            onClick={() => setRole("department_head")}
+            style={{
+              padding: "1rem", border: `2px solid ${role === 'department_head' ? 'var(--primary)' : 'var(--border)'}`,
+              borderRadius: "var(--radius)", cursor: "pointer", textAlign: "center",
+              background: role === 'department_head' ? 'var(--primary-light)' : 'white',
+              transition: "all 0.2s"
+            }}
+          >
+            <FaUniversity size={24} color={role === 'department_head' ? 'var(--primary)' : 'var(--text-light)'} />
+            <div style={{ marginTop: "0.5rem", fontWeight: 600, fontSize: "0.9rem", color: role === 'department_head' ? 'var(--primary)' : 'var(--text-secondary)' }}>Dept Head</div>
+          </div>
         </div>
 
         <form onSubmit={handleLogin}>
@@ -90,7 +108,7 @@ const Login = () => {
             <label className="form-label">Username / Email</label>
             <input
               type="text"
-              placeholder={role === "student" ? "student@uni.edu" : "admin_user"}
+              placeholder={role === "student" ? "student@uni.edu" : (role === "admin" ? "admin_user" : "dept_head")}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required

@@ -10,6 +10,7 @@ import StudentManagement from "./admin/StudentManagement";
 
 import AddOnApprovals from "./admin/AddOnApprovals";
 import ExceptionApprovals from "./admin/ExceptionApprovals";
+import DepartmentHeadDashboard from "./departmentHead/DepartmentHeadDashboard";
 
 // Simple Protected Route
 const ProtectedRoute = ({ children, role }) => {
@@ -43,6 +44,14 @@ function App() {
               <Route path="addon-approvals" element={<AddOnApprovals />} />
               <Route path="exception-approvals" element={<ExceptionApprovals />} />
             </Route>
+            <Route
+              path="/department-head/*"
+              element={
+                <ProtectedRoute role="department_head">
+                  <DepartmentHeadDashboard />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/student/*"
               element={

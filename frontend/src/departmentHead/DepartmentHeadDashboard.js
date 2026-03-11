@@ -3,17 +3,18 @@ import { useToast } from '../components/ui/Toast';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 
-const AddOnApprovals = () => {
+const DepartmentHeadDashboard = () => {
     const [requests, setRequests] = useState([]);
     const { addToast } = useToast();
+    const user = JSON.parse(localStorage.getItem("user")) || {};
 
     const fetchRequests = async () => {
+        if (!user.dept_id) return;
         try {
-            const res = await fetch("http://localhost:5000/requests");
+            const res = await fetch(`http://localhost:5000/requests/department/${user.dept_id}`);
             const data = await res.json();
             if (Array.isArray(data)) {
-                // Filter for Add-On type requests
-                setRequests(data.filter(r => r.request_type === 'addon'));
+                setRequests(data);
             }
         } catch (err) {
             addToast("Failed to fetch requests", "error");
@@ -22,21 +23,20 @@ const AddOnApprovals = () => {
 
     useEffect(() => {
         fetchRequests();
-    }, []);
+    }, [user.dept_id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleAction = async (id, status) => {
         try {
             const res = await fetch(`http://localhost:5000/requests/${id}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: status === 'Approve' ? 'approved' : 'rejected', role: 'admin' })
+                body: JSON.stringify({ status: status === 'Approve' ? 'approved' : 'rejected', role: 'department_head' })
             });
             let data = {};
             try {
                 data = await res.json();
-            } catch (jsonErr) {
-                // If the response is not JSON, we ignore it since we will check res.ok
-            }
+            } catch (jsonErr) { }
+
             if (res.ok) {
                 addToast(`Request ${status}d successfully`, "success");
                 // Remove the processed request from the list
@@ -51,21 +51,21 @@ const AddOnApprovals = () => {
 
     return (
         <div>
-            <h2 style={{ marginBottom: '1.5rem' }}>Approve Add-On Courses</h2>
+            <h2 style={{ marginBottom: '1.5rem' }}>Department Head Approval Dashboard</h2>
             <Card>
                 {requests.length === 0 ? (
-                    <p style={{ color: 'var(--text-secondary)' }}>No add-on course requests found.</p>
+                    <p style={{ color: 'var(--text-secondary)' }}>No pending requests from your department.</p>
                 ) : (
                     <div style={{ overflowX: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                             <thead>
                                 <tr style={{ borderBottom: '2px solid var(--border)' }}>
                                     <th style={{ padding: '1rem' }}>Student</th>
-                                    <th style={{ padding: '1rem' }}>Department</th>
+                                    <th style={{ padding: '1rem' }}>Semester</th>
+                                    <th style={{ padding: '1rem' }}>Request Type</th>
                                     <th style={{ padding: '1rem' }}>Course Type</th>
                                     <th style={{ padding: '1rem' }}>Course Name</th>
                                     <th style={{ padding: '1rem' }}>Credits</th>
-                                    <th style={{ padding: '1rem' }}>Status</th>
                                     <th style={{ padding: '1rem' }}>Actions</th>
                                 </tr>
                             </thead>
@@ -78,31 +78,16 @@ const AddOnApprovals = () => {
                                                 <div style={{ fontWeight: 500 }}>{req.student_name}</div>
                                                 <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{req.email || 'N/A'}</div>
                                             </td>
-                                            <td style={{ padding: '1rem' }}>{req.dept_name || 'N/A'}</td>
+                                            <td style={{ padding: '1rem' }}>{req.semester || 'N/A'}</td>
+                                            <td style={{ padding: '1rem', textTransform: 'capitalize' }}>{req.request_type}</td>
                                             <td style={{ padding: '1rem' }}>
-                                                <span className="badge badge-blue">{details.course_type || 'Add-On'}</span>
+                                                <span className="badge badge-blue">{details.course_type || (req.request_type === 'exception' ? 'Exception' : 'Add-On')}</span>
                                             </td>
                                             <td style={{ padding: '1rem' }}>{req.course_name}</td>
                                             <td style={{ padding: '1rem' }}>{details.credits || '-'}</td>
-                                            <td style={{ padding: '1rem' }}>
-                                                <span className={`badge ${req.status === 'Completed' || req.status === 'approved' ? 'badge-green' : req.status === 'Rejected by Admin' || req.status === 'rejected' ? 'badge-red' : 'badge-yellow'}`}>
-                                                    {req.status === 'approved' ? 'Completed' : req.status === 'rejected' ? 'Rejected' : req.status}
-                                                </span>
-                                            </td>
                                             <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
-                                                {req.status === 'Pending - Admin Approval' && (
-                                                    <>
-                                                        <Button size="sm" variant="success" onClick={() => handleAction(req.id, 'Approve')}>Approve</Button>
-                                                        <Button size="sm" variant="danger" onClick={() => handleAction(req.id, 'Reject')}>Reject</Button>
-                                                    </>
-                                                )}
-                                                {/* Fallback for old requests */}
-                                                {req.status === 'pending' && (
-                                                    <>
-                                                        <Button size="sm" variant="success" onClick={() => handleAction(req.id, 'Approve')}>Approve</Button>
-                                                        <Button size="sm" variant="danger" onClick={() => handleAction(req.id, 'Reject')}>Reject</Button>
-                                                    </>
-                                                )}
+                                                <Button size="sm" variant="success" onClick={() => handleAction(req.id, 'Approve')}>Approve</Button>
+                                                <Button size="sm" variant="danger" onClick={() => handleAction(req.id, 'Reject')}>Reject</Button>
                                             </td>
                                         </tr>
                                     );
@@ -116,4 +101,4 @@ const AddOnApprovals = () => {
     );
 };
 
-export default AddOnApprovals;
+export default DepartmentHeadDashboard;

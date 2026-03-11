@@ -303,13 +303,26 @@ function StudentDashboard() {
                         ) : (
                             <ul style={{ listStyle: 'none' }}>
                                 {requests.map(r => {
-                                    let displayStatus = r.status === 'approved' ? 'Completed' : r.status;
+                                    let displayStatus = r.status;
+                                    let statusColor = 'var(--accent)'; // default pending color
 
-                                    if (r.request_type === 'exception' && r.status === 'approved') {
-                                        displayStatus = 'Course Excepted';
-                                    } else if (r.request_type === 'addon' && r.status === 'approved') {
-                                        const isExcepted = requests.some(req => req.request_type === 'exception' && req.status === 'approved' && req.details && req.details.description === r.course_name);
-                                        if (isExcepted) displayStatus = 'EXCEPTED';
+                                    if (r.status === 'Completed' || r.status === 'Excepted' || r.status === 'approved') {
+                                        displayStatus = r.request_type === 'exception' ? 'Course Excepted' : 'Completed';
+                                        statusColor = 'var(--success)';
+
+                                        // Special case: Addon used for exception
+                                        if (r.request_type === 'addon' && r.status === 'approved') {
+                                            const isExcepted = requests.some(req => req.request_type === 'exception' && req.status === 'approved' && req.details && req.details.description === r.course_name);
+                                            if (isExcepted) {
+                                                displayStatus = 'EXCEPTED';
+                                            }
+                                        }
+                                    } else if (r.status.startsWith('Rejected')) {
+                                        displayStatus = r.status; // 'Rejected by Department Head' or 'Rejected by Admin'
+                                        statusColor = 'var(--danger)';
+                                    } else if (r.status.startsWith('Pending')) {
+                                        displayStatus = r.status; // 'Pending - Department Head Approval' etc.
+                                        statusColor = 'var(--accent)';
                                     }
 
                                     return (
@@ -325,7 +338,7 @@ function StudentDashboard() {
                                                 <div style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--text)' }}>{r.course_name}</div>
                                                 <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'capitalize', marginTop: '0.2rem' }}>{r.request_type}</div>
                                             </div>
-                                            <span style={{ fontSize: '0.85rem', fontWeight: 500, color: r.status === 'pending' ? 'var(--accent)' : 'var(--success)' }}>
+                                            <span style={{ fontSize: '0.85rem', fontWeight: 500, color: statusColor, textAlign: 'right', maxWidth: '150px' }}>
                                                 {displayStatus}
                                             </span>
                                         </li>
@@ -603,7 +616,7 @@ function StudentDashboard() {
                                 // Check if already used for exception
                                 const isUsed = requests.some(req =>
                                     req.request_type === 'exception' &&
-                                    req.status === 'approved' &&
+                                    (req.status === 'approved' || req.status === 'Excepted') &&
                                     req.details &&
                                     req.details.description === c.course_name
                                 );

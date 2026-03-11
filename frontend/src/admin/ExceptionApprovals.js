@@ -29,7 +29,7 @@ const ExceptionApprovals = () => {
             const res = await fetch(`http://localhost:5000/requests/${id}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: status === 'Approve' ? 'approved' : 'rejected' })
+                body: JSON.stringify({ status: status === 'Approve' ? 'approved' : 'rejected', role: 'admin' })
             });
             const data = await res.json();
             if (res.ok) {
@@ -76,11 +76,18 @@ const ExceptionApprovals = () => {
                                             <td style={{ padding: '1rem' }}>{req.course_name}</td>
                                             <td style={{ padding: '1rem' }}>{details.description || details.details || '-'}</td>
                                             <td style={{ padding: '1rem' }}>
-                                                <span className={`badge ${req.status === 'Completed' ? 'badge-green' : req.status === 'Rejected' ? 'badge-red' : 'badge-yellow'}`}>
-                                                    {req.status}
+                                                <span className={`badge ${req.status === 'Excepted' || req.status === 'Completed' || req.status === 'approved' ? 'badge-green' : req.status === 'Rejected by Admin' || req.status === 'Rejected' ? 'badge-red' : 'badge-yellow'}`}>
+                                                    {req.status === 'approved' ? 'Excepted' : req.status === 'rejected' ? 'Rejected' : req.status}
                                                 </span>
                                             </td>
                                             <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
+                                                {req.status === 'Pending - Admin Approval' && (
+                                                    <>
+                                                        <Button size="sm" variant="success" onClick={() => handleAction(req.id, 'Approve')}>Approve</Button>
+                                                        <Button size="sm" variant="danger" onClick={() => handleAction(req.id, 'Reject')}>Reject</Button>
+                                                    </>
+                                                )}
+                                                {/* Fallback for old requests */}
                                                 {req.status === 'pending' && (
                                                     <>
                                                         <Button size="sm" variant="success" onClick={() => handleAction(req.id, 'Approve')}>Approve</Button>
