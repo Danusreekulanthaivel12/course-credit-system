@@ -14,6 +14,7 @@ INSERT IGNORE INTO admins (id, username, password) VALUES (1, 'admin', 'admin123
 -- Department Heads Table
 CREATE TABLE IF NOT EXISTS department_heads (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     dept_id INT,
@@ -22,7 +23,7 @@ CREATE TABLE IF NOT EXISTS department_heads (
 
 -- Insert default department heads attached to departments
 -- Dept 7 is used in the database by students. So we will add a dept head for dept 7
-INSERT IGNORE INTO department_heads (username, password, dept_id) VALUES ('dept_head', 'password', 7);
+INSERT IGNORE INTO department_heads (name, username, password, dept_id) VALUES ('Default Head', 'dept_head', 'password', 7);
 
 -- Departments Table
 CREATE TABLE IF NOT EXISTS departments (

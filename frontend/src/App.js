@@ -7,7 +7,7 @@ import { ToastProvider } from "./components/ui/Toast";
 import DepartmentManagement from "./admin/DepartmentManagement";
 import CourseManagement from "./admin/CourseManagement";
 import StudentManagement from "./admin/StudentManagement";
-
+import DepartmentHeadManagement from "./admin/DepartmentHeadManagement";
 import AddOnApprovals from "./admin/AddOnApprovals";
 import ExceptionApprovals from "./admin/ExceptionApprovals";
 import DepartmentHeadDashboard from "./departmentHead/DepartmentHeadDashboard";
@@ -41,6 +41,8 @@ function App() {
               <Route path="departments" element={<DepartmentManagement />} />
               <Route path="courses" element={<CourseManagement />} />
               <Route path="students" element={<StudentManagement />} />
+              <Route path="department-heads" element={<DepartmentHeadManagement />} />
+              <Route path="department-head-dashboard" element={<DepartmentHeadDashboard />} />
               <Route path="addon-approvals" element={<AddOnApprovals />} />
               <Route path="exception-approvals" element={<ExceptionApprovals />} />
             </Route>

@@ -93,6 +93,81 @@ app.delete("/departments/:id", (req, res) => {
   });
 });
 
+// --- Department Heads ---
+app.get("/api/department-heads", (req, res) => {
+  db.query(`
+        SELECT dh.*, d.name as dept_name 
+        FROM department_heads dh 
+        LEFT JOIN departments d ON dh.dept_id = d.id`, 
+    (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json(result);
+  });
+});
+
+app.post("/api/department-heads", (req, res) => {
+  const { name, username, password, department, role } = req.body;
+  const targetRole = role || 'DEPARTMENT_HEAD';
+
+  db.query("SELECT id FROM departments WHERE name = ?", [department], (err, deptRes) => {
+    const dept_id = deptRes && deptRes.length > 0 ? deptRes[0].id : null;
+    
+    db.query(
+      "INSERT INTO department_heads (name, username, password, department, role, dept_id) VALUES (?, ?, ?, ?, ?, ?)",
+      [name, username, password, department, targetRole, dept_id],
+      (err, result) => {
+        if (err) {
+          if (err.code === 'ER_DUP_ENTRY') return res.status(400).json({ message: "Username already exists" });
+          return res.status(500).json(err);
+        }
+        res.json({ message: "Department head added", id: result.insertId });
+      }
+    );
+  });
+});
+
+app.put("/api/department-heads/:id", (req, res) => {
+  const { name, username, password, department, role } = req.body;
+  const targetRole = role || 'DEPARTMENT_HEAD';
+
+  db.query("SELECT id FROM departments WHERE name = ?", [department], (err, deptRes) => {
+    const dept_id = deptRes && deptRes.length > 0 ? deptRes[0].id : null;
+
+    if (!password || password.trim() === '') {
+      db.query(
+        "UPDATE department_heads SET name = ?, username = ?, department = ?, role = ?, dept_id = ? WHERE id = ?",
+        [name, username, department, targetRole, dept_id, req.params.id],
+        (updateErr) => {
+          if (updateErr) {
+            if (updateErr.code === 'ER_DUP_ENTRY') return res.status(400).json({ message: "Username already exists" });
+            return res.status(500).json(updateErr);
+          }
+          res.json({ message: "Department head updated" });
+        }
+      );
+    } else {
+      db.query(
+        "UPDATE department_heads SET name = ?, username = ?, password = ?, department = ?, role = ?, dept_id = ? WHERE id = ?",
+        [name, username, password, department, targetRole, dept_id, req.params.id],
+        (updateErr) => {
+          if (updateErr) {
+            if (updateErr.code === 'ER_DUP_ENTRY') return res.status(400).json({ message: "Username already exists" });
+            return res.status(500).json(updateErr);
+          }
+          res.json({ message: "Department head updated" });
+        }
+      );
+    }
+  });
+});
+
+app.delete("/api/department-heads/:id", (req, res) => {
+  db.query("DELETE FROM department_heads WHERE id=?", [req.params.id], (err) => {
+    if (err) return res.status(500).json(err);
+    res.json({ message: "Department head deleted" });
+  });
+});
+
 // --- Semester Limits ---
 app.get("/semester-limits", (req, res) => {
   db.query("SELECT * FROM semester_limits", (err, result) => {
@@ -332,6 +407,22 @@ app.get("/requests", (req, res) => {
     JOIN students s ON r.student_id = s.id 
     LEFT JOIN departments d ON s.dept_id = d.id 
     WHERE r.status = 'Pending - Admin Approval'
+    ORDER BY r.created_at DESC
+  `;
+  db.query(sql, (err, result) => {
+    if (err) return res.status(500).json(err);
+    res.json(result);
+  });
+});
+
+// Admin: Get all requests pending Department Head approval across all departments
+app.get("/requests/all/department-pending", (req, res) => {
+  const sql = `
+    SELECT r.*, s.name as student_name, s.email, s.semester, d.name as dept_name 
+    FROM course_requests r 
+    JOIN students s ON r.student_id = s.id 
+    LEFT JOIN departments d ON s.dept_id = d.id 
+    WHERE r.status = 'Pending - Department Head Approval'
     ORDER BY r.created_at DESC
   `;
   db.query(sql, (err, result) => {
