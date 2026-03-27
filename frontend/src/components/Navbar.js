@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUniversity, FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
 import Button from './ui/Button';
+import API_BASE_URL from '../config';
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -12,7 +13,7 @@ const Navbar = () => {
 
     useEffect(() => {
         if (role === 'student' && user.dept_id) {
-            fetch("http://localhost:5000/departments")
+            fetch(`${API_BASE_URL}/departments`)
                 .then(r => r.json())
                 .then(depts => {
                     const deptObj = (Array.isArray(depts) ? depts : []).find(d => d.id === user.dept_id);

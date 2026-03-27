@@ -3,6 +3,7 @@ import { IoAdd, IoTrash, IoSchool, IoPencil } from "react-icons/io5";
 import Modal from "../components/Modal";
 import ConfirmDialog from "../components/ConfirmDialog";
 import { useToast } from "../components/ui/Toast";
+import API_BASE_URL from "../config";
 
 function DepartmentManagement() {
     const [departments, setDepartments] = useState([]);
@@ -19,7 +20,7 @@ function DepartmentManagement() {
 
     const fetchDepartments = async () => {
         try {
-            const res = await fetch("http://localhost:5000/departments");
+            const res = await fetch(`${API_BASE_URL}/departments`);
             if (!res.ok) throw new Error("Failed to fetch");
             const data = await res.json();
             setDepartments(Array.isArray(data) ? data : []);
@@ -54,8 +55,8 @@ function DepartmentManagement() {
         if (!newDept.trim()) return;
 
         const url = isEditMode
-            ? `http://localhost:5000/departments/${currentDeptId}`
-            : "http://localhost:5000/departments";
+            ? `${API_BASE_URL}/departments/${currentDeptId}`
+            : `${API_BASE_URL}/departments`;
 
         const method = isEditMode ? "PUT" : "POST";
 
@@ -83,7 +84,7 @@ function DepartmentManagement() {
     const handleDelete = async () => {
         if (!deptToDelete) return;
         try {
-            await fetch(`http://localhost:5000/departments/${deptToDelete}`, { method: "DELETE" });
+            await fetch(`${API_BASE_URL}/departments/${deptToDelete}`, { method: "DELETE" });
             fetchDepartments();
             addToast("Department deleted successfully", "success");
             setIsDeleteOpen(false);

@@ -5,6 +5,7 @@ import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import Modal from "../components/Modal";
 import { useToast } from "../components/ui/Toast";
+import API_BASE_URL from "../config";
 
 function StudentDashboard() {
     const [student] = useState(JSON.parse(localStorage.getItem("user")) || {});
@@ -35,10 +36,10 @@ function StudentDashboard() {
     useEffect(() => {
         if (!student.id) return;
         Promise.all([
-            fetch(`http://localhost:5000/courses?semester=${student.semester}`).then(r => r.json()),
-            fetch(`http://localhost:5000/registrations/${student.id}`).then(r => r.json()),
-            fetch(`http://localhost:5000/requests/${student.id}`).then(r => r.json()),
-            fetch("http://localhost:5000/semester-limits").then(r => r.json())
+            fetch(`${API_BASE_URL}/courses?semester=${student.semester}`).then(r => r.json()),
+            fetch(`${API_BASE_URL}/registrations/${student.id}`).then(r => r.json()),
+            fetch(`${API_BASE_URL}/requests/${student.id}`).then(r => r.json()),
+            fetch(`${API_BASE_URL}/semester-limits`).then(r => r.json())
         ]).then(([coursesData, regData, requestsData, limitsData]) => {
             setCourses(Array.isArray(coursesData) ? coursesData : []);
             const regs = Array.isArray(regData) ? regData : [];
@@ -68,13 +69,13 @@ function StudentDashboard() {
     }, [registeredCourses, regularCourses]);
 
     const fetchRegisteredCourses = async () => {
-        const res = await fetch(`http://localhost:5000/registrations/${student.id}`);
+        const res = await fetch(`${API_BASE_URL}/registrations/${student.id}`);
         const data = await res.json();
         setRegisteredCourses(Array.isArray(data) ? data : []);
     };
 
     const fetchRequests = async () => {
-        const res = await fetch(`http://localhost:5000/requests/${student.id}`);
+        const res = await fetch(`${API_BASE_URL}/requests/${student.id}`);
         const data = await res.json();
         setRequests(Array.isArray(data) ? data : []);
     }
@@ -97,7 +98,7 @@ function StudentDashboard() {
         try {
             // Optimistically disable the button by instantly identifying it as registered
             // Or wait for the API - we will wait for API to be safe, but just add it to the list.
-            const res = await fetch("http://localhost:5000/registrations", {
+            const res = await fetch(`${API_BASE_URL}/registrations`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ student_id: student.id, course_id: course.id }),
@@ -133,7 +134,7 @@ function StudentDashboard() {
         if (type === 'addon' && !requestForm.credits) return addToast("Credits are required", "error");
 
         try {
-            const res = await fetch("http://localhost:5000/requests", {
+            const res = await fetch(`${API_BASE_URL}/requests`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

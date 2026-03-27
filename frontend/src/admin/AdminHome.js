@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { IoSchool, IoPeople, IoBook } from "react-icons/io5";
 import StatsCard from "../components/StatsCard";
+import API_BASE_URL from "../config";
 
 function AdminHome() {
     const [counts, setCounts] = useState({ departments: 0, students: 0, courses: 0 });
@@ -9,8 +10,8 @@ function AdminHome() {
         const fetchData = async () => {
             // In a real app, I'd make a dedicated stats API or fetch all length
             // For now, I'll fetch lists and count. Not efficient for big data, but OK for this.
-            const depts = await fetch("http://localhost:5000/departments").then(r => r.json());
-            const students = await fetch("http://localhost:5000/students").then(r => r.json());
+            const depts = await fetch(`${API_BASE_URL}/departments`).then(r => r.json());
+            const students = await fetch(`${API_BASE_URL}/students`).then(r => r.json());
             // For courses, we need to try to get all. Current API filters by Dept/Sem.
             // I'll filter logically or just rely on the other endpoints for now.
 

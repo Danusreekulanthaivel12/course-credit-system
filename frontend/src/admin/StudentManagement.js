@@ -3,6 +3,7 @@ import { IoAdd, IoTrash, IoPerson, IoArrowForward } from "react-icons/io5";
 import Modal from "../components/Modal";
 import ConfirmDialog from "../components/ConfirmDialog";
 import { useToast } from "../components/ui/Toast";
+import API_BASE_URL from "../config";
 
 function StudentManagement() {
     const [departments, setDepartments] = useState([]);
@@ -32,8 +33,8 @@ function StudentManagement() {
         setLoading(true);
         try {
             const [deptRes, stuRes] = await Promise.all([
-                fetch("http://localhost:5000/departments"),
-                fetch("http://localhost:5000/students")
+                fetch(`${API_BASE_URL}/departments`),
+                fetch(`${API_BASE_URL}/students`)
             ]);
 
             if (!deptRes.ok || !stuRes.ok) throw new Error("Failed to fetch data");
@@ -60,7 +61,7 @@ function StudentManagement() {
     const handleAdd = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch("http://localhost:5000/students", {
+            const response = await fetch(`${API_BASE_URL}/students`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newStudent),
@@ -88,7 +89,7 @@ function StudentManagement() {
     const handleDelete = async () => {
         if (!studentToDelete) return;
         try {
-            await fetch(`http://localhost:5000/students/${studentToDelete}`, { method: "DELETE" });
+            await fetch(`${API_BASE_URL}/students/${studentToDelete}`, { method: "DELETE" });
             fetchData();
             addToast("Student deleted", "success");
             setIsDeleteOpen(false);
@@ -109,7 +110,7 @@ function StudentManagement() {
     const executeBulkUpdate = async () => {
         setIsBulkConfirmOpen(false);
         try {
-            const response = await fetch("http://localhost:5000/students/promote", {
+            const response = await fetch(`${API_BASE_URL}/students/promote`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(bulkData),

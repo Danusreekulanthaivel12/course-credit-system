@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useToast } from '../components/ui/Toast';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import API_BASE_URL from '../config';
 
 const DepartmentHeadDashboard = () => {
     const [requests, setRequests] = useState([]);
@@ -13,9 +14,9 @@ const DepartmentHeadDashboard = () => {
         try {
             let url = "";
             if (role === "admin") {
-                url = "http://localhost:5000/requests/all/department-pending";
+                url = `${API_BASE_URL}/requests/all/department-pending`;
             } else if (role === "department_head" && user.dept_id) {
-                url = `http://localhost:5000/requests/department/${user.dept_id}`;
+                url = `${API_BASE_URL}/requests/department/${user.dept_id}`;
             } else {
                 return; // Nothing to fetch
             }
@@ -37,7 +38,7 @@ const DepartmentHeadDashboard = () => {
     const handleAction = async (id, status) => {
         if (role !== "department_head") return;
         try {
-            const res = await fetch(`http://localhost:5000/requests/${id}/status`, {
+            const res = await fetch(`${API_BASE_URL}/requests/${id}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: status === 'Approve' ? 'approved' : 'rejected', role: 'department_head' })

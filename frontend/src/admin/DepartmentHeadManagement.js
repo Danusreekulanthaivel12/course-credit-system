@@ -3,6 +3,7 @@ import { IoAdd, IoTrash, IoPerson, IoPencil } from "react-icons/io5";
 import Modal from "../components/Modal";
 import ConfirmDialog from "../components/ConfirmDialog";
 import { useToast } from "../components/ui/Toast";
+import API_BASE_URL from "../config";
 
 function DepartmentHeadManagement() {
     const [departments, setDepartments] = useState([]);
@@ -26,8 +27,8 @@ function DepartmentHeadManagement() {
         setLoading(true);
         try {
             const [deptRes, headRes] = await Promise.all([
-                fetch("http://localhost:5000/departments"),
-                fetch("http://localhost:5000/api/department-heads")
+                fetch(`${API_BASE_URL}/departments`),
+                fetch(`${API_BASE_URL}/api/department-heads`)
             ]);
 
             if (!deptRes.ok || !headRes.ok) throw new Error("Failed to fetch data");
@@ -54,8 +55,8 @@ function DepartmentHeadManagement() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const url = editingHead 
-            ? `http://localhost:5000/api/department-heads/${editingHead.id}`
-            : "http://localhost:5000/api/department-heads";
+            ? `${API_BASE_URL}/api/department-heads/${editingHead.id}`
+            : `${API_BASE_URL}/api/department-heads`;
         const method = editingHead ? "PUT" : "POST";
 
         try {
@@ -86,7 +87,7 @@ function DepartmentHeadManagement() {
     const handleDelete = async () => {
         if (!headToDelete) return;
         try {
-            await fetch(`http://localhost:5000/api/department-heads/${headToDelete}`, { method: "DELETE" });
+            await fetch(`${API_BASE_URL}/api/department-heads/${headToDelete}`, { method: "DELETE" });
             fetchData();
             addToast("Department Head deleted", "success");
             setIsDeleteOpen(false);

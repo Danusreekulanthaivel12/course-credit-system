@@ -3,6 +3,7 @@ import { IoPerson } from "react-icons/io5";
 import StatsCard from "../components/StatsCard";
 import Card from "../components/ui/Card";
 import { useToast } from "../components/ui/Toast";
+import API_BASE_URL from "../config";
 
 function RegistrationStats() {
     const [stats, setStats] = useState({ department: [], semester: [] });
@@ -13,7 +14,7 @@ function RegistrationStats() {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const res = await fetch("http://localhost:5000/registrations/stats");
+                const res = await fetch(`${API_BASE_URL}/registrations/stats`);
                 if (!res.ok) throw new Error("Failed to fetch statistics");
 
                 const data = await res.json();

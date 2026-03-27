@@ -3,6 +3,7 @@ import { IoAdd, IoTrash, IoPencil, IoSettings } from "react-icons/io5";
 import Modal from "../components/Modal";
 import ConfirmDialog from "../components/ConfirmDialog";
 import { useToast } from "../components/ui/Toast";
+import API_BASE_URL from "../config";
 
 function CourseManagement() {
     const [departments, setDepartments] = useState([]);
@@ -32,7 +33,7 @@ function CourseManagement() {
     });
 
     useEffect(() => {
-        fetch("http://localhost:5000/departments")
+        fetch(`${API_BASE_URL}/departments`)
             .then(res => {
                 if (!res.ok) throw new Error("Failed to fetch");
                 return res.json();
@@ -52,10 +53,10 @@ function CourseManagement() {
         if (!selectedDept || !selectedSem) return;
         setLoading(true);
 
-        const fetchCourses = fetch(`http://localhost:5000/courses?dept_id=${selectedDept}&semester=${selectedSem}`)
+        const fetchCourses = fetch(`${API_BASE_URL}/courses?dept_id=${selectedDept}&semester=${selectedSem}`)
             .then(r => { if (!r.ok) throw new Error("Courses fetch failed"); return r.json(); });
 
-        const fetchLimits = fetch("http://localhost:5000/semester-limits")
+        const fetchLimits = fetch(`${API_BASE_URL}/semester-limits`)
             .then(r => { if (!r.ok) throw new Error("Limits fetch failed"); return r.json(); });
 
         Promise.all([fetchCourses, fetchLimits])
@@ -102,8 +103,8 @@ function CourseManagement() {
         e.preventDefault();
 
         const url = isEditMode
-            ? `http://localhost:5000/courses/${currentCourseId}`
-            : "http://localhost:5000/courses";
+            ? `${API_BASE_URL}/courses/${currentCourseId}`
+            : `${API_BASE_URL}/courses`;
 
         const method = isEditMode ? "PUT" : "POST";
         const body = isEditMode
@@ -133,7 +134,7 @@ function CourseManagement() {
     const handleUpdateLimit = async (e) => {
         e.preventDefault();
         try {
-            await fetch(`http://localhost:5000/semester-limits/${selectedSem}`, {
+            await fetch(`${API_BASE_URL}/semester-limits/${selectedSem}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ credit_limit: newLimit })
@@ -154,7 +155,7 @@ function CourseManagement() {
     const handleDelete = async () => {
         if (!courseToDelete) return;
         try {
-            const res = await fetch(`http://localhost:5000/courses/${courseToDelete}`, { method: "DELETE" });
+            const res = await fetch(`${API_BASE_URL}/courses/${courseToDelete}`, { method: "DELETE" });
             const data = await res.json();
 
             if (res.ok) {

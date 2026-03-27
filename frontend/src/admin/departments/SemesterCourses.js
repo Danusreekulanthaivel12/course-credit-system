@@ -2,6 +2,7 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./Department.css";
+import API_BASE_URL from "../../config";
 
 const SemesterCourses = () => {
   const { dept, sem } = useParams();
@@ -12,7 +13,7 @@ const SemesterCourses = () => {
   const [courses, setCourses] = useState([]);
 
   const fetchCourses = () => {
-    fetch(`http://localhost:5000/courses/${dept}/${sem}`)
+    fetch(`${API_BASE_URL}/courses/${dept}/${sem}`)
       .then((res) => res.json())
       .then((data) => setCourses(data));
   };
@@ -25,7 +26,7 @@ const SemesterCourses = () => {
   if (!course.trim() || !credit) return;
 
   try {
-    const res = await fetch("http://localhost:5000/courses", {
+    const res = await fetch(`${API_BASE_URL}/courses`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

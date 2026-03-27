@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useToast } from '../components/ui/Toast';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import API_BASE_URL from '../config';
 
 const AddOnApprovals = () => {
     const [requests, setRequests] = useState([]);
@@ -9,7 +10,7 @@ const AddOnApprovals = () => {
 
     const fetchRequests = async () => {
         try {
-            const res = await fetch("http://localhost:5000/requests");
+            const res = await fetch(`${API_BASE_URL}/requests`);
             const data = await res.json();
             if (Array.isArray(data)) {
                 // Filter for Add-On type requests
@@ -26,7 +27,7 @@ const AddOnApprovals = () => {
 
     const handleAction = async (id, status) => {
         try {
-            const res = await fetch(`http://localhost:5000/requests/${id}/status`, {
+            const res = await fetch(`${API_BASE_URL}/requests/${id}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: status === 'Approve' ? 'approved' : 'rejected', role: 'admin' })

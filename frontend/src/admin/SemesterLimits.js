@@ -4,6 +4,7 @@ import { IoSave } from "react-icons/io5";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import { useToast } from "../components/ui/Toast";
+import API_BASE_URL from "../config";
 
 const SemesterLimits = () => {
     const [limits, setLimits] = useState([]);
@@ -16,7 +17,7 @@ const SemesterLimits = () => {
 
     const fetchLimits = async () => {
         try {
-            const res = await axios.get("http://localhost:5000/semester-limits");
+            const res = await axios.get(`${API_BASE_URL}/semester-limits`);
             setLimits(res.data);
             setLoading(false);
         } catch (error) {
@@ -27,7 +28,7 @@ const SemesterLimits = () => {
 
     const handleUpdate = async (semester, newLimit) => {
         try {
-            await axios.put(`http://localhost:5000/semester-limits/${semester}`, { credit_limit: newLimit });
+            await axios.put(`${API_BASE_URL}/semester-limits/${semester}`, { credit_limit: newLimit });
             addToast(`Limit for Semester ${semester} updated to ${newLimit}`, "success");
             fetchLimits();
         } catch (error) {

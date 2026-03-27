@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import API_BASE_URL from "./config";
 import { useNavigate } from "react-router-dom";
 import { FaUserGraduate, FaChalkboardTeacher, FaUniversity } from "react-icons/fa";
 import Button from "./components/ui/Button";
@@ -18,7 +19,7 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:5000/login", { username, password, role });
+      const res = await axios.post(`${API_BASE_URL}/login`, { username, password, role });
       if (res.data.success) {
         localStorage.setItem("role", res.data.role);
         localStorage.setItem("user", JSON.stringify(res.data.user));

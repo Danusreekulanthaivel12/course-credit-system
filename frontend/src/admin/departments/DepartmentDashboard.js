@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import "./Department.css";
+import API_BASE_URL from "../../config";
 
 const DepartmentDashboard = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const DepartmentDashboard = () => {
   /* ================= FETCH ================= */
   const fetchDepartments = async () => {
     try {
-      const res = await fetch("http://localhost:5000/departments");
+      const res = await fetch(`${API_BASE_URL}/departments`);
       const data = await res.json();
       setDepartments(data); // ✅ backend returns array
     } catch (err) {
@@ -29,13 +30,13 @@ const DepartmentDashboard = () => {
     if (!name.trim()) return;
 
     if (editId) {
-      await fetch(`http://localhost:5000/departments/${editId}`, {
+      await fetch(`${API_BASE_URL}/departments/${editId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name })
       });
     } else {
-      await fetch("http://localhost:5000/departments", {
+      await fetch(`${API_BASE_URL}/departments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name })
@@ -51,7 +52,7 @@ const DepartmentDashboard = () => {
   const deleteDepartment = async (id) => {
     if (!window.confirm("Delete this department?")) return;
 
-    await fetch(`http://localhost:5000/departments/${id}`, {
+    await fetch(`${API_BASE_URL}/departments/${id}`, {
       method: "DELETE"
     });
 
