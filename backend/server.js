@@ -116,8 +116,8 @@ app.post("/api/department-heads", (req, res) => {
     const dept_id = deptRes && deptRes.length > 0 ? deptRes[0].id : null;
     
     db.query(
-      "INSERT INTO department_heads (name, username, password, department, role, dept_id) VALUES (?, ?, ?, ?, ?, ?)",
-      [name, username, password, department, targetRole, dept_id],
+      "INSERT INTO department_heads (name, username, password, dept_id) VALUES (?, ?, ?, ?)",
+      [name, username, password, dept_id],
       (err, result) => {
         if (err) {
           if (err.code === 'ER_DUP_ENTRY') return res.status(400).json({ message: "Username already exists" });
@@ -138,8 +138,8 @@ app.put("/api/department-heads/:id", (req, res) => {
 
     if (!password || password.trim() === '') {
       db.query(
-        "UPDATE department_heads SET name = ?, username = ?, department = ?, role = ?, dept_id = ? WHERE id = ?",
-        [name, username, department, targetRole, dept_id, req.params.id],
+        "UPDATE department_heads SET name = ?, username = ?, dept_id = ? WHERE id = ?",
+        [name, username, dept_id, req.params.id],
         (updateErr) => {
           if (updateErr) {
             if (updateErr.code === 'ER_DUP_ENTRY') return res.status(400).json({ message: "Username already exists" });
@@ -150,8 +150,8 @@ app.put("/api/department-heads/:id", (req, res) => {
       );
     } else {
       db.query(
-        "UPDATE department_heads SET name = ?, username = ?, password = ?, department = ?, role = ?, dept_id = ? WHERE id = ?",
-        [name, username, password, department, targetRole, dept_id, req.params.id],
+        "UPDATE department_heads SET name = ?, username = ?, password = ?, dept_id = ? WHERE id = ?",
+        [name, username, password, dept_id, req.params.id],
         (updateErr) => {
           if (updateErr) {
             if (updateErr.code === 'ER_DUP_ENTRY') return res.status(400).json({ message: "Username already exists" });

@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS course_credit_system;
-USE course_credit_system;
+-- CREATE DATABASE IF NOT EXISTS course_credit_system;
+-- USE course_credit_system;
 
 -- Admins Table
 CREATE TABLE IF NOT EXISTS admins (
@@ -10,6 +10,12 @@ CREATE TABLE IF NOT EXISTS admins (
 
 -- Insert default admin if not exists
 INSERT IGNORE INTO admins (id, username, password) VALUES (1, 'admin', 'admin123');
+
+-- Departments Table
+CREATE TABLE IF NOT EXISTS departments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
 
 -- Department Heads Table
 CREATE TABLE IF NOT EXISTS department_heads (
@@ -25,11 +31,7 @@ CREATE TABLE IF NOT EXISTS department_heads (
 -- Dept 7 is used in the database by students. So we will add a dept head for dept 7
 INSERT IGNORE INTO department_heads (name, username, password, dept_id) VALUES ('Default Head', 'dept_head', 'password', 7);
 
--- Departments Table
-CREATE TABLE IF NOT EXISTS departments (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE
-);
+
 
 -- Students Table
 CREATE TABLE IF NOT EXISTS students (
